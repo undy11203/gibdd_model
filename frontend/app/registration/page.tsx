@@ -1,21 +1,27 @@
 "use client";
 
-import axios from 'axios';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { register } from '@/utils/api';
+
+interface RegisterFormData {
+  name: string;
+  email: string;
+  password: string;
+}
 
 export default function Register() {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState<RegisterFormData>({ name: '', email: '', password: '' });
   const router = useRouter();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axios.post('/api/auth/register', formData);
+      await register(formData);
       alert('Пользователь успешно зарегистрирован!');
       router.push('/login');
     } catch (error) {

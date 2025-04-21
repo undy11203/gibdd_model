@@ -2,6 +2,8 @@ package org.web.gibdd_model.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import org.web.gibdd_model.model.enums.TheftPopularity;
 
 @Data
@@ -17,5 +19,6 @@ public class Brand {
     private String name;
 
     @Column(name = "theft_popularity")
+    @Enumerated(EnumType.STRING)
     private TheftPopularity theftPopularity;
 }

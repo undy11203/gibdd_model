@@ -42,7 +42,7 @@ public class Vehicle {
     private VehicleType vehicleType;
 
     @OneToOne
-    @JoinColumn(name = "license_plate_id")
+    @JoinColumn(name = "license_number")
     private LicensePlate licensePlate;
 
     @ManyToOne

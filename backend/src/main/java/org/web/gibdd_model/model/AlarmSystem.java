@@ -2,6 +2,8 @@ package org.web.gibdd_model.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import org.web.gibdd_model.model.enums.Reliability;
 
 @Data
@@ -17,5 +19,6 @@ public class AlarmSystem {
     private String name;
 
     @Column(name = "reliability")
+    @Enumerated(EnumType.STRING)
     private Reliability reliability; // надежность
 }

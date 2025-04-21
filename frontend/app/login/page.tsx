@@ -1,21 +1,26 @@
 "use client";
 
-import axios from 'axios';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { login } from '@/utils/api';
+
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 export default function Login() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '' });
   const router = useRouter();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axios.post('/api/auth/login', formData);
+      await login(formData);
       alert('Успешный вход!');
       router.push('/');
     } catch (error) {

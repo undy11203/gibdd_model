@@ -1,0 +1,827 @@
+openapi: 3.0.0
+info:
+  title: GIBDD API
+  version: 1.0.0
+paths:
+  /organizations:
+    get:
+      summary: Get a list of organizations
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of organizations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+    post:
+      summary: Create a new organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationInput'
+      responses:
+        '201':
+          description: The created organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+  /organizations/{id}:
+    get:
+      summary: Get an organization by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+    put:
+      summary: Update an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationInput'
+      responses:
+        '200':
+          description: The updated organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+    delete:
+      summary: Delete an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+  /vehicles:
+    get:
+      summary: Get a list of vehicles
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: owner_id
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+    post:
+      summary: Create a new vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleInput'
+      responses:
+        '201':
+          description: The created vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+  /vehicles/{id}:
+    get:
+      summary: Get a vehicle by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+    put:
+      summary: Update a vehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleInput'
+      responses:
+        '200':
+          description: The updated vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+    delete:
+      summary: Delete a vehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+  /accidents:
+    get:
+      summary: Get a list of accidents
+      parameters:
+        - name: date_from
+          in: query
+          schema:
+            type: string
+        - name: date_to
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of accidents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Accident'
+    post:
+      summary: Create a new accident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccidentInput'
+      responses:
+        '201':
+          description: The created accident
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accident'
+  /accidents/{id}:
+    get:
+      summary: Get an accident by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The accident
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accident'
+    put:
+      summary: Update an accident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccidentInput'
+      responses:
+        '200':
+          description: The updated accident
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accident'
+    delete:
+      summary: Delete an accident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+  /thefts:
+    get:
+      summary: Get a list of thefts
+      parameters:
+        - name: date_from
+          in: query
+          schema:
+            type: string
+        - name: date_to
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of thefts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Theft'
+    post:
+      summary: Create a new theft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TheftInput'
+      responses:
+        '201':
+          description: The created theft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theft'
+  /thefts/{id}:
+    get:
+      summary: Get a theft by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The theft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theft'
+    put:
+      summary: Update a theft
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TheftInput'
+      responses:
+        '200':
+          description: The updated theft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theft'
+    delete:
+      summary: Delete a theft
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+  /wanted:
+    get:
+      summary: Get a list of wanted vehicles
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of wanted vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wanted'
+    post:
+      summary: Create a new wanted vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WantedInput'
+      responses:
+        '201':
+          description: The created wanted vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wanted'
+  /wanted/{id}:
+    get:
+      summary: Get a wanted vehicle by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The wanted vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wanted'
+    put:
+      summary: Update a wanted vehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WantedInput'
+      responses:
+        '200':
+          description: The updated wanted vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wanted'
+    delete:
+      summary: Delete a wanted vehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+  /owners:
+    get:
+      summary: Get a list of owners
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of owners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Owner'
+    post:
+      summary: Create a new owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerInput'
+      responses:
+        '201':
+          description: The created owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+  /owners/{id}:
+    get:
+      summary: Get an owner by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+    put:
+      summary: Update an owner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerInput'
+      responses:
+        '200':
+          description: The updated owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+    delete:
+      summary: Delete an owner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+  /numbers:
+    get:
+      summary: Get a list of numbers
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: series
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of numbers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Number'
+    post:
+      summary: Create a new number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NumberInput'
+      responses:
+        '201':
+          description: The created number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Number'
+  /numbers/{id}:
+    get:
+      summary: Get a number by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Number'
+    put:
+      summary: Update a number
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NumberInput'
+      responses:
+        '200':
+          description: The updated number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Number'
+    delete:
+      summary: Delete a number
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+components:
+  schemas:
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        district:
+          type: string
+        address:
+          type: string
+        director:
+          type: string
+    OrganizationInput:
+      type: object
+      properties:
+        name:
+          type: string
+        district:
+          type: string
+        address:
+          type: string
+        director:
+          type: string
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        year:
+          type: string
+        licensePlate:
+          type: string
+        ownerId:
+          type: string
+        organizationId:
+          type: string
+    VehicleInput:
+      type: object
+      properties:
+        brand:
+          type: string
+        model:
+          type: string
+        year:
+          type: string
+        licensePlate:
+          type: string
+        ownerId:
+          type: string
+        organizationId:
+          type: string
+    Accident:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        vehicles:
+          type: array
+          items:
+            type: string
+        victims:
+          type: integer
+        damage:
+          type: number
+    AccidentInput:
+      type: object
+      properties:
+        date:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        vehicles:
+          type: array
+          items:
+            type: string
+        victims:
+          type: integer
+        damage:
+          type: number
+    Theft:
+      type: object
+      properties:
+        id:
+          type: string
+        vehicleId:
+          type: string
+        theftDate:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+    TheftInput:
+      type: object
+      properties:
+        vehicleId:
+          type: string
+        theftDate:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+    Wanted:
+      type: object
+      properties:
+        id:
+          type: string
+        vehicleId:
+          type: string
+        additionDate:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+    WantedInput:
+      type: object
+      properties:
+        vehicleId:
+          type: string
+        additionDate:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+    Owner:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+    OwnerInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+    Number:
+      type: object
+      properties:
+        id:
+          type: string
+        licensePlate:
+          type: string
+        number:
+          type: integer
+        series:
+          type: string
+        status:
+          type: boolean
+    NumberInput:
+      type: object
+      properties:
+        licensePlate:
+          type: string
+        number:
+          type: integer
+        series:
+          type: string
+        status:
+          type: boolean

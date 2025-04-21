@@ -1,5 +1,7 @@
 package org.web.gibdd_model.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.web.gibdd_model.model.AlarmSystem;
@@ -14,4 +16,6 @@ public interface AlarmSystemRepository extends JpaRepository<AlarmSystem, Intege
             "GROUP BY s.name " +
             "ORDER BY theftCount ASC")
     List<Object[]> getMostReliableAlarmSystems();
+
+    Page<AlarmSystem> findByNameContaining(String search, Pageable pageable);
 }

@@ -1,5 +1,7 @@
 package org.web.gibdd_model.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TheftRepository extends JpaRepository<Theft, Long> {
+
+    Page<Theft> findByTheftDateBetween(LocalDate dateFrom, LocalDate dateTo, Pageable pageable);
 
     //Получить перечень и общее число угонов за указанный период.
     @Query("SELECT m.name AS brand, COUNT(*) AS theftCount " +
@@ -28,4 +32,5 @@ public interface TheftRepository extends JpaRepository<Theft, Long> {
             "GROUP BY m.name " +
             "ORDER BY theftCount DESC")
     List<Object[]> getMostStolenBrands();
+
 }

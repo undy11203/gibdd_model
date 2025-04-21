@@ -1,5 +1,7 @@
 package org.web.gibdd_model.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,7 +10,7 @@ import org.web.gibdd_model.model.Vehicle;
 import java.util.List;
 
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
-
+    
     //Досье на автомобиль
     @Query("SELECT a.engineNumber, a.chassisNumber, a.bodyNumber, " +
             "CASE WHEN dtp.id IS NOT NULL THEN 'Да' ELSE 'Нет' END AS inAccident, " +
@@ -19,4 +21,10 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             "LEFT JOIN TechnicalInspection tos ON a.id = tos.vehicle.id " +
             "WHERE a.licensePlate.licenseNumber = :licensePlate")
     List<Object[]> getVehicleDossier(@Param("licensePlate") String licensePlate);
+    
+    Page<Vehicle> findByOwnerId(Long ownerId, Pageable pageable);
+
+    Page<Vehicle> findByVehicleTypeAndOwnerId(String type, Long ownerId, Pageable pageable);
+
+    Page<Vehicle> findByVehicleType(String type, Pageable pageable);
 }

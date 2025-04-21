@@ -13,12 +13,6 @@ java {
     }
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
 repositories {
     mavenCentral()
 }
@@ -27,7 +21,6 @@ dependencies {
     // Spring Boot dependencies
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // Lombok for boilerplate code reduction
@@ -35,10 +28,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     // PostgreSQL driver for database connectivity
-    runtimeOnly 'org.postgresql:postgresql' // Заменяет H2 на PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql:42.7.1' // Указана конкретная версия
 
     // Hibernate Spatial for PostGIS support
-    implementation 'org.hibernate.orm:hibernate-spatial'
+    implementation 'org.hibernate.orm:hibernate-spatial:6.6.8.Final' // Указана конкретная версия
     implementation 'org.locationtech.jts:jts-core:1.19.0'
 
     // Testing dependencies

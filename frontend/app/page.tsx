@@ -14,6 +14,7 @@ export default function Home() {
         <li><Link href="/wanted" className="text-blue-500">Розыск угнанных ТС</Link></li>
         <li><Link href="/inspection" className="text-blue-500">Техосмотр</Link></li>
         <li><Link href="/admin" className="text-blue-500">Администрирование</Link></li>
+        <li><Link href="/sales" className="text-blue-500">Купля-продажа авто</Link></li>
       </ul>
     </div>
   );

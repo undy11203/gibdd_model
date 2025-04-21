@@ -1,0 +1,181 @@
+# Владельцы
+GET /api/owners
+Params: search, page, limit
+
+POST /api/owners
+Body: {"ФИО": "string", "Адрес": "string", "Телефон": "string"}
+
+GET /api/owners/{id}
+
+PUT /api/owners/{id}
+Body: {"ФИО": "string", "Адрес": "string", "Телефон": "string"}
+
+DELETE /api/owners/{id}
+
+# Организации
+GET /api/organizations
+Params: search, page, limit
+
+POST /api/organizations
+Body: {
+  "Название": "string",
+  "Район": "string",
+  "Адрес": "string",
+  "Руководитель": "string"
+}
+
+GET /api/organizations/{id}
+
+PUT /api/organizations/{id}
+Body: {
+  "Название": "string",
+  "Район": "string",
+  "Адрес": "string",
+  "Руководитель": "string"
+}
+
+DELETE /api/organizations/{id}
+
+# Номера
+GET /api/numbers
+Params: status, series, page, limit
+
+POST /api/numbers
+Body: {
+  "Госномер": "string",
+  "Номер": "integer",
+  "Серия": "string",
+  "Статус": "boolean"
+}
+
+GET /api/numbers/{number}
+
+PUT /api/numbers/{number}
+Body: {
+  "Госномер": "string",
+  "Номер": "integer",
+  "Серия": "string",
+  "Статус": "boolean"
+}
+
+DELETE /api/numbers/{number}
+
+# Автотранспортные средства
+GET /api/vehicles
+Params: type, owner_id, page, limit
+
+POST /api/vehicles
+Body: {
+  "ID_Марка": "integer",
+  "Дата_выпуска": "date",
+  "Объем_двигателя": "float",
+  "Номер_двигателя": "string",
+  "Номер_шасси": "string",
+  "Номер_кузова": "string",
+  "Цвет": "string",
+  "Тип_ТС": "string",
+  "Госномер": "string",
+  "ID_владельца": "integer",
+  "ID_организации": "integer",
+  "ID_сигнализации": "integer"
+}
+
+GET /api/vehicles/{id}
+
+PUT /api/vehicles/{id}
+Body: {
+  "ID_Марка": "integer",
+  "Дата_выпуска": "date",
+  "Объем_двигателя": "float",
+  "Номер_двигателя": "string",
+  "Номер_шасси": "string",
+  "Номер_кузова": "string",
+  "Цвет": "string",
+  "Тип_ТС": "string",
+  "Госномер": "string",
+  "ID_владельца": "integer",
+  "ID_организации": "integer",
+  "ID_сигнализации": "integer"
+}
+
+DELETE /api/vehicles/{id}
+
+# ДТП
+GET /api/accidents
+Params: date_from, date_to, type, page, limit
+
+POST /api/accidents
+Body: {
+  "Дата": "date",
+  "Место": {"lat": "float", "lng": "float"},
+  "Тип_происшествия": "string",
+  "Краткое_содержание": "text",
+  "Число_пострадавших": "integer",
+  "Сумма_ущерба": "float",
+  "Причина": "string",
+  "Условия_дороги": "string"
+}
+
+GET /api/accidents/{id}
+
+PUT /api/accidents/{id}
+Body: {
+  "Дата": "date",
+  "Место": {"lat": "float", "lng": "float"},
+  "Тип_происшествия": "string",
+  "Краткое_содержание": "text",
+  "Число_пострадавших": "integer",
+  "Сумма_ущерба": "float",
+  "Причина": "string",
+  "Условия_дороги": "string"
+}
+
+DELETE /api/accidents/{id}
+
+# Угоны
+GET /api/thefts
+Params: date_from, date_to, page, limit
+
+POST /api/thefts
+Body: {
+  "ID_авто": "integer",
+  "Дата_угон": "date",
+  "Место": {"lat": "float", "lng": "float"},
+  "Описание": "text"
+}
+
+GET /api/thefts/{id}
+
+PUT /api/thefts/{id}
+Body: {
+  "ID_авто": "integer",
+  "Дата_угон": "date",
+  "Место": {"lat": "float", "lng": "float"},
+  "Описание": "text"
+}
+
+DELETE /api/thefts/{id}
+
+# Розыск
+GET /api/wanted
+Params: status, page, limit
+
+POST /api/wanted
+Body: {
+  "ID_авто": "integer",
+  "Дата_добавления": "date",
+  "Причина_розыска": "string",
+  "Статус": "string"
+}
+
+GET /api/wanted/{id}
+
+PUT /api/wanted/{id}
+Body: {
+  "ID_авто": "integer",
+  "Дата_добавления": "date",
+  "Причина_розыска": "string",
+  "Статус": "string"
+}
+
+DELETE /api/wanted/{id}

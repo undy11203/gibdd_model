@@ -1,5 +1,7 @@
 package org.web.gibdd_model.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, Long> {
+
+    Page<Organization> findByNameContaining(String name, Pageable pageable);
 
     //Получить перечень и общее число организаций, которым выделены номера либо с указанной серией, либо за указанный период
     @Query("SELECT o.name AS organizationName, COUNT(o) AS totalCount " +

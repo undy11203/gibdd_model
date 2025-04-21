@@ -42,60 +42,53 @@ const AddTechnicalInspectionForm = () => {
   const [vehicleSuggestions, setVehicleSuggestions] = useState<Vehicle[]>([]);
   const router = useRouter();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-  
-    if (name === 'ownerId') {
-      // Проверяем, является ли значение числом
-      const numericValue = value ? Number(value) : null;
-      if (!isNaN(numericValue)) {
-        setFormData((prev) => ({
-          ...prev,
-          ownerId: numericValue,
-        }));
-      } else {
-        // Если значение некорректное, устанавливаем ownerId в null
-        setFormData((prev) => ({
-          ...prev,
-          ownerId: null,
-        }));
-      }
-  
-      // Поиск владельцев
-      getOwners({ search: value }).then((response) =>
-        setOwnerSuggestions(response.data)
-      );
-    } else if (name === 'vehicleId') {
-      // Обработка выбора транспортного средства
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value === '' ? null : Number(value),
-      }));
-    } else {
-      // Обновление остальных полей
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
+const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+  console.log(value);
 
-  const handleOwnerSelect = (owner: Owner) => {
-    if (owner) {
-      setFormData((prev) => ({
-        ...prev,
-        ownerId: owner.id,
-      }));
-      setOwnerSuggestions([]); // Очищаем подсказки для владельцев
+  // Преобразуем значение в нужный тип данных
+  const parsedValue =
+    name === 'ownerId'
+      ? value === '' ? null : value
+      : name === 'vehicleId'
+      ? value === '' ? null : Number(value)
+      : value;
 
-      // Загружаем транспортные средства для выбранного владельца
-      getVehicles({ owner_id: owner.id }).then((response) =>
-        setVehicleSuggestions(response.data)
-      );
-    }
-  };
+  if (name === 'ownerId') {
+    // Поиск владельцев
+    getOwners({ search: value }).then((response) =>
+      setOwnerSuggestions(response.data.content)
+    );
+  } else if (name === 'vehicleId') {
+    // Поиск транспортных средств
+    getVehicles({ owner_id: formData.ownerId ?? undefined }).then((response) =>
+      setVehicleSuggestions(response.data)
+    );
+  }
+
+  // Обновляем состояние формы
+  setFormData((prev) => ({
+    ...prev,
+    [name]: parsedValue,
+  }));
+};
+
+const handleOwnerSelect = (owner: Owner) => {
+  if (owner) {
+    setFormData((prev) => ({
+      ...prev,
+      ownerId: owner.id,
+    }));
+    setOwnerSuggestions([]); // Очищаем подсказки для владельцев
+
+    // Загружаем транспортные средства для выбранного владельца
+    getVehicles({ owner_id: owner.id }).then((response) =>
+      setVehicleSuggestions(response.data.content)
+    );
+  }
+};
 
   const handleVehicleSelect = (vehicle: Vehicle) => {
     setFormData((prev) => ({
@@ -126,23 +119,14 @@ const AddTechnicalInspectionForm = () => {
         <label htmlFor="ownerId" className="block text-sm font-medium text-gray-700">
           Владелец
         </label>
-        <input
-          type="text"
-          name="ownerId"
-          placeholder="Search for an owner"
-          value={formData.ownerId !== null ? formData.ownerId.toString() : ''}
-          onChange={(e) => {
-            const { value } = e.target;
-            setFormData((prev) => ({
-              ...prev,
-              ownerId: value ? Number(value) : null,
-            }));
-            getOwners({ search: value }).then((response) =>
-              setOwnerSuggestions(response.data)
-            );
-          }}
-          className="border p-2 w-full"
-        />
+<input
+  type="text"
+  name="ownerId"
+  placeholder="Search for an owner"
+  value={formData.ownerId !== null ? String(formData.ownerId) : ''}
+  onChange={handleChange}
+  className="border p-2 w-full"
+/>
         {ownerSuggestions.length > 0 && (
           <ul className="border p-2 w-full max-h-40 overflow-y-auto">
             {ownerSuggestions.map((owner) => (
@@ -151,41 +135,33 @@ const AddTechnicalInspectionForm = () => {
                 onClick={() => handleOwnerSelect(owner)}
                 className="cursor-pointer hover:bg-gray-100 p-2"
               >
-                {owner.fullName || owner.name || 'Unknown Owner'}
+                {owner.fullName || 'Unknown Owner'}
               </li>
             ))}
           </ul>
         )}
 
         {/* Vehicle */}
-        {formData.ownerId && (
-          <>
-            <label htmlFor="vehicleId" className="block text-sm font-medium text-gray-700">
-              Транспортное средство
-            </label>
-            <input
-              type="text"
-              name="vehicleId"
-              placeholder="Search for a vehicle"
-              value={formData.vehicleId || ''}
-              onChange={handleChange}
-              className="border p-2 w-full"
-            />
-            {vehicleSuggestions.length > 0 && (
-              <ul className="border p-2 w-full max-h-40 overflow-y-auto">
-                {vehicleSuggestions.map((vehicle) => (
-                  <li
-                    key={vehicle.id}
-                    onClick={() => handleVehicleSelect(vehicle)}
-                    className="cursor-pointer hover:bg-gray-100 p-2"
-                  >
-                    {`${vehicle.brand?.name ?? 'Unknown Brand'} (${vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'})`}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
+{formData.ownerId && (
+  <>
+    <label htmlFor="vehicleId" className="block text-sm font-medium text-gray-700">
+      Транспортное средство
+    </label>
+    <select
+      name="vehicleId"
+      value={formData.vehicleId || ''}
+      onChange={handleChange}
+      className="border p-2 w-full"
+    >
+      <option value="">Select a vehicle</option>
+      {vehicleSuggestions.map((vehicle) => (
+        <option key={vehicle.id} value={vehicle.id}>
+          {`${vehicle.brand?.name ?? 'Unknown Brand'} (${vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'})`}
+        </option>
+      ))}
+    </select>
+  </>
+)}
 
         {/* Inspection Date */}
         <label htmlFor="inspectionDate" className="block text-sm font-medium text-gray-700">

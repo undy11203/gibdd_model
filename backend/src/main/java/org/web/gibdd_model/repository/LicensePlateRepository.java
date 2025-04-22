@@ -5,6 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.web.gibdd_model.model.LicensePlate;
 
-public interface LicensePlateRepository extends JpaRepository<LicensePlate, Long> {
+import java.util.List;
+
+public interface LicensePlateRepository extends JpaRepository<LicensePlate, String> {
     Page<LicensePlate> findByNumberContaining(String search, Pageable pageable);
+
+    List<LicensePlate> findAllByStatusFalseOrStatusTrue();
 }

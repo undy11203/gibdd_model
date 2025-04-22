@@ -2,25 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AddOrganizationForm from '@/components/forms/AddOrganizationForm';
-import { getOrganizations } from '@/utils/api';
-import { Organization } from '@/types/type';
+import { getOrganizations, getVehicles } from '@/utils/api';
+import { Organization, Vehicle } from '@/types/type';
 
 export default function Organizations() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   const router = useRouter();
 
   useEffect(() => {
-    const fetchOrganizations = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getOrganizations({});
-        setOrganizations(response.data.content);
+        const orgResponse = await getOrganizations({});
+        setOrganizations(orgResponse.data.content || orgResponse.data);
+
+        const vehResponse = await getVehicles({});
+        setVehicles(vehResponse.data.content || vehResponse.data);
       } catch (error) {
         console.error(error);
       }
     };
-    fetchOrganizations();
+    fetchData();
   }, []);
 
   return (
@@ -44,18 +47,43 @@ export default function Organizations() {
       </button>
       <h1 className="text-2xl font-bold mb-4">Организации</h1>
 
-      <h2 className="text-xl font-semibold mb-2">Список организаций</h2>
-      <ul className="space-y-2 mb-6">
-        {organizations != undefined && organizations.map((organization) => (
-          <li key={organization.id} className="border p-2">
-<strong>{organization.name}</strong> - {organization.district}, {organization.address}, Директор: {organization.director}
-<pre>{JSON.stringify(organization, null, 2)}</pre>
-          </li>
-        ))}
-      </ul>
-
-      <h2 className="text-xl font-semibold mb-2">Регистрация организации</h2>
-      <AddOrganizationForm />
+      <h2 className="text-xl font-semibold mb-2">Список организаций с транспортом</h2>
+      <table className="min-w-full border border-gray-300">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="border px-4 py-2">Название</th>
+            <th className="border px-4 py-2">Район</th>
+            <th className="border px-4 py-2">Адрес</th>
+            <th className="border px-4 py-2">Директор</th>
+            <th className="border px-4 py-2">Транспорт</th>
+          </tr>
+        </thead>
+        <tbody>
+          {organizations.map((org: Organization) => (
+            <tr key={org.id} className="border-t">
+              <td className="border px-4 py-2">{org.name}</td>
+              <td className="border px-4 py-2">{org.district}</td>
+              <td className="border px-4 py-2">{org.address}</td>
+              <td className="border px-4 py-2">{org.director}</td>
+              <td className="border px-4 py-2">
+                {vehicles.filter((vehicle) => vehicle?.organization && vehicle.organization.id === org.id).length > 0 ? (
+                  <ul>
+                    {vehicles
+                      .filter((vehicle) => vehicle?.organization && vehicle.organization.id === org.id)
+                      .map((vehicle) => (
+                        <li key={vehicle.id}>
+                          {vehicle.licensePlate?.licenseNumber ?? 'No Plate'} - {vehicle.brand?.name ?? 'No Brand'}
+                        </li>
+                      ))}
+                  </ul>
+                ) : (
+                  <span>Нет транспорта</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

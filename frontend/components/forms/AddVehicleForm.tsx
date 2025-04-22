@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   addVehicle,
   getOwners,
@@ -9,11 +9,11 @@ import {
   getBrands,
   getAlarmSystems,
   getLicensePlates,
-} from '@/utils/api';
-import { Brand, Owner, Organization, AlarmSystem } from '@/types/vehicle';
+} from "@/utils/api";
+import { Brand, Owner, Organization, AlarmSystem } from "@/types/type";
 
 interface VehicleFormData {
-  brandId: number | null; // Используем null для числовых полей
+  brandId: number | null;
   alarmSystemId: number | null;
   ownerId: number | null;
   organizationId: number | null;
@@ -32,35 +32,65 @@ interface Suggestion {
   name: string;
 }
 
-const prepareFormData = (formData: VehicleFormData): {
-  brandId: number;
-  alarmSystemId: number;
-  ownerId: number;
-  organizationId: number;
-  licensePlateId: number;
-  releaseDate: string;
-  engineVolume: number;
-  engineNumber: string;
-  chassisNumber: string;
-  bodyNumber: string;
-  color: string;
-  vehicleType: string;
-} => {
-  return {
-    brandId: formData.brandId || 0, // Заменяем null на 0
-    alarmSystemId: formData.alarmSystemId || 0,
-    ownerId: formData.ownerId || 0,
-    organizationId: formData.organizationId || 0,
-    licensePlateId: formData.licensePlateId || 0,
-    releaseDate: formData.releaseDate + 'T00:00:00',
-    engineVolume: formData.engineVolume || 0,
-    engineNumber: formData.engineNumber,
-    chassisNumber: formData.chassisNumber,
-    bodyNumber: formData.bodyNumber,
-    color: formData.color,
-    vehicleType: formData.vehicleType,
-  };
+interface SuggestionInputProps {
+  name: keyof VehicleFormData;
+  placeholder: string;
+  value: number | null;
+  suggestions: Suggestion[];
+  onInputChange: (name: keyof VehicleFormData, value: string) => void;
+  onSuggestionSelect: (name: keyof VehicleFormData, suggestion: Suggestion) => void;
+}
+
+const SuggestionInput = ({
+  name,
+  placeholder,
+  value,
+  suggestions,
+  onInputChange,
+  onSuggestionSelect,
+}: SuggestionInputProps) => {
+  return (
+    <div>
+      <input
+        type="text"
+        name={name}
+        placeholder={placeholder}
+        value={value !== null ? String(value) : ""}
+        onChange={(e) => onInputChange(name, e.target.value)}
+        className="border p-2 w-full"
+        autoComplete="off"
+      />
+      {suggestions.length > 0 && (
+        <ul className="border p-2 w-full max-h-40 overflow-auto">
+          {suggestions.map((suggestion) => (
+            <li
+              key={suggestion.id}
+              onClick={() => onSuggestionSelect(name, suggestion)}
+              className="cursor-pointer hover:bg-gray-100"
+            >
+              {suggestion.name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 };
+
+const prepareFormData = (formData: VehicleFormData) => ({
+  brandId: formData.brandId || 0,
+  alarmSystemId: formData.alarmSystemId || 0,
+  ownerId: formData.ownerId || 0,
+  organizationId: formData.organizationId || 0,
+  licensePlateId: formData.licensePlateId || 0,
+  releaseDate: formData.releaseDate + "T00:00:00",
+  engineVolume: formData.engineVolume || 0,
+  engineNumber: formData.engineNumber,
+  chassisNumber: formData.chassisNumber,
+  bodyNumber: formData.bodyNumber,
+  color: formData.color,
+  vehicleType: formData.vehicleType,
+});
 
 const AddVehicleForm = () => {
   const [formData, setFormData] = useState<VehicleFormData>({
@@ -69,90 +99,136 @@ const AddVehicleForm = () => {
     ownerId: null,
     organizationId: null,
     licensePlateId: null,
-    releaseDate: '',
+    releaseDate: "",
     engineVolume: null,
-    engineNumber: '',
-    chassisNumber: '',
-    bodyNumber: '',
-    color: '',
-    vehicleType: '',
+    engineNumber: "",
+    chassisNumber: "",
+    bodyNumber: "",
+    color: "",
+    vehicleType: "",
   });
 
   const [suggestions, setSuggestions] = useState<{
-    [key: string]: (Brand | Owner | Organization | AlarmSystem | Suggestion)[];
+    [key in keyof Pick<
+      VehicleFormData,
+      "brandId" | "alarmSystemId" | "ownerId" | "organizationId" | "licensePlateId"
+    >]: Suggestion[];
   }>({
-    brand: [],
-    alarmSystem: [],
-    owner: [],
-    organization: [],
-    licensePlate: [],
+    brandId: [],
+    alarmSystemId: [],
+    ownerId: [],
+    organizationId: [],
+    licensePlateId: [],
   });
 
   const router = useRouter();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
+  // Fetch suggestions based on field and search value
+  const fetchSuggestions = useCallback(
+    async (field: keyof typeof suggestions, search: string) => {
+      if (!search) {
+        setSuggestions((prev) => ({ ...prev, [field]: [] }));
+        return;
+      }
+      try {
+        let response;
+        switch (field) {
+          case "brandId":
+            response = await getBrands({ search });
+            break;
+          case "alarmSystemId":
+            response = await getAlarmSystems({ search });
+            break;
+          case "ownerId":
+            response = await getOwners({ search });
+            break;
+          case "organizationId":
+            response = await getOrganizations({ search });
+            break;
+          case "licensePlateId":
+            response = await getLicensePlates({ search });
+            break;
+          default:
+            response = { data: [] };
+        }
+        setSuggestions((prev) => ({ ...prev, [field]: response.data }));
+      } catch (error) {
+        console.error("Error fetching suggestions for", field, error);
+      }
+    },
+    []
+  );
 
-    // Преобразуем значение в нужный тип данных
+  const handleInputChange = (name: keyof VehicleFormData, value: string) => {
+    // For numeric fields, parse to number or null
     const parsedValue =
-      name === 'engineVolume'
-        ? parseFloat(value) || null // Преобразуем в число или null
-        : value === '' && ['brandId', 'alarmSystemId', 'ownerId', 'organizationId', 'licensePlateId'].includes(name)
-        ? null // Для числовых полей присваиваем null, если значение пустое
+      name === "engineVolume"
+        ? parseFloat(value) || null
+        : value === "" &&
+          ["brandId", "alarmSystemId", "ownerId", "organizationId", "licensePlateId"].includes(
+            name
+          )
+        ? null
         : value;
 
-    if (name === 'brandId') {
-      getBrands({ search: value }).then((response) =>
-        setSuggestions((prev) => ({ ...prev, brand: response.data }))
-      );
-    } else if (name === 'alarmSystemId') {
-      getAlarmSystems({ search: value }).then((response) =>
-        setSuggestions((prev) => ({ ...prev, alarmSystem: response.data }))
-      );
-    } else if (name === 'ownerId') {
-      getOwners({ search: value }).then((response) =>
-        setSuggestions((prev) => ({ ...prev, owner: response.data }))
-      );
-    } else if (name === 'organizationId') {
-      getOrganizations({ search: value }).then((response) =>
-        setSuggestions((prev) => ({ ...prev, organization: response.data }))
-      );
-    } else if (name === 'licensePlateId') {
-      getLicensePlates({ search: value }).then((response) =>
-        setSuggestions((prev) => ({ ...prev, licensePlate: response.data }))
-      );
-    }
-
-    // Обновляем состояние формы
     setFormData((prev) => ({
       ...prev,
       [name]: parsedValue,
     }));
+
+    // Fetch suggestions for relevant fields
+    if (
+      ["brandId", "alarmSystemId", "ownerId", "organizationId", "licensePlateId"].includes(
+        name
+      )
+    ) {
+      fetchSuggestions(name as keyof typeof suggestions, value);
+    }
   };
 
-  const handleSuggestionSelect = (field: string, suggestion: Suggestion) => {
+  const handleSuggestionSelect = (name: keyof VehicleFormData, suggestion: Suggestion) => {
     setFormData((prev) => ({
       ...prev,
-      [`${field}Id`]: suggestion.id,
+      [name]: suggestion.id,
     }));
     setSuggestions((prev) => ({
       ...prev,
-      [field]: [], // Очищаем подсказки после выбора
+      [name]: [],
     }));
+  };
+
+  const validateForm = (): boolean => {
+    if (
+      !formData.brandId ||
+      !formData.alarmSystemId ||
+      !formData.ownerId ||
+      !formData.organizationId ||
+      !formData.licensePlateId ||
+      !formData.releaseDate ||
+      !formData.engineVolume ||
+      !formData.engineNumber ||
+      !formData.chassisNumber ||
+      !formData.bodyNumber ||
+      !formData.color ||
+      !formData.vehicleType
+    ) {
+      alert("Пожалуйста, заполните все поля");
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!validateForm()) return;
     try {
-      const preparedData = prepareFormData(formData); // Преобразуем данные
-      await addVehicle(preparedData); // Отправляем преобразованные данные
-      alert('Vehicle successfully registered!');
-      router.push('/vehicles');
+      const preparedData = prepareFormData(formData);
+      await addVehicle(preparedData);
+      alert("Транспортное средство успешно зарегистрировано!");
+      router.push("/vehicles");
     } catch (error) {
       console.error(error);
-      alert('Error registering vehicle.');
+      alert("Ошибка при регистрации транспортного средства.");
     }
   };
 
@@ -160,186 +236,105 @@ const AddVehicleForm = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Регистрация транспортного средства</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Brand */}
-        <input
-          type="text"
+        <SuggestionInput
           name="brandId"
-          placeholder="Search for a brand"
-          value={formData.brandId || ''} // Преобразуем null в пустую строку
-          onChange={handleChange}
-          className="border p-2 w-full"
+          placeholder="Поиск марки"
+          value={formData.brandId}
+          suggestions={suggestions.brandId}
+          onInputChange={handleInputChange}
+          onSuggestionSelect={handleSuggestionSelect}
         />
-        {suggestions.brand.length > 0 && (
-          <ul className="border p-2 w-full">
-            {suggestions.brand.map((suggestion) => (
-              <li
-                key={suggestion.id}
-                onClick={() => handleSuggestionSelect('brand', suggestion)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                {suggestion.name}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* Alarm System */}
-        <input
-          type="text"
+        <SuggestionInput
           name="alarmSystemId"
-          placeholder="Search for an alarm system"
-          value={formData.alarmSystemId || ''}
-          onChange={handleChange}
-          className="border p-2 w-full"
+          placeholder="Поиск сигнализации"
+          value={formData.alarmSystemId}
+          suggestions={suggestions.alarmSystemId}
+          onInputChange={handleInputChange}
+          onSuggestionSelect={handleSuggestionSelect}
         />
-        {suggestions.alarmSystem.length > 0 && (
-          <ul className="border p-2 w-full">
-            {suggestions.alarmSystem.map((suggestion) => (
-              <li
-                key={suggestion.id}
-                onClick={() => handleSuggestionSelect('alarmSystem', suggestion)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                {suggestion.name}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* Owner */}
-        <input
-          type="text"
+        <SuggestionInput
           name="ownerId"
-          placeholder="Search for an owner"
-          value={formData.ownerId || ''}
-          onChange={handleChange}
-          className="border p-2 w-full"
+          placeholder="Поиск владельца"
+          value={formData.ownerId}
+          suggestions={suggestions.ownerId}
+          onInputChange={handleInputChange}
+          onSuggestionSelect={handleSuggestionSelect}
         />
-        {suggestions.owner.length > 0 && (
-          <ul className="border p-2 w-full">
-            {suggestions.owner.map((suggestion) => (
-              <li
-                key={suggestion.id}
-                onClick={() => handleSuggestionSelect('owner', suggestion)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                {suggestion.name}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* Organization */}
-        <input
-          type="text"
+        <SuggestionInput
           name="organizationId"
-          placeholder="Search for an organization"
-          value={formData.organizationId || ''}
-          onChange={handleChange}
-          className="border p-2 w-full"
+          placeholder="Поиск организации"
+          value={formData.organizationId}
+          suggestions={suggestions.organizationId}
+          onInputChange={handleInputChange}
+          onSuggestionSelect={handleSuggestionSelect}
         />
-        {suggestions.organization.length > 0 && (
-          <ul className="border p-2 w-full">
-            {suggestions.organization.map((suggestion) => (
-              <li
-                key={suggestion.id}
-                onClick={() => handleSuggestionSelect('organization', suggestion)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                {suggestion.name}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* License Plate */}
-        <input
-          type="text"
+        <SuggestionInput
           name="licensePlateId"
-          placeholder="Search for a license plate"
-          value={formData.licensePlateId || ''}
-          onChange={handleChange}
-          className="border p-2 w-full"
+          placeholder="Поиск номера"
+          value={formData.licensePlateId}
+          suggestions={suggestions.licensePlateId}
+          onInputChange={handleInputChange}
+          onSuggestionSelect={handleSuggestionSelect}
         />
-        {suggestions.licensePlate.length > 0 && (
-          <ul className="border p-2 w-full">
-            {suggestions.licensePlate.map((suggestion) => (
-              <li
-                key={suggestion.id}
-                onClick={() => handleSuggestionSelect('licensePlate', suggestion)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                {suggestion.name}
-              </li>
-            ))}
-          </ul>
-        )}
 
-        {/* Release Date */}
         <input
           type="date"
           name="releaseDate"
           placeholder="Дата выпуска"
           value={formData.releaseDate}
-          onChange={handleChange}
+          onChange={(e) => handleInputChange("releaseDate", e.target.value)}
           className="border p-2 w-full"
         />
 
-        {/* Engine Volume */}
         <input
           type="number"
           name="engineVolume"
           placeholder="Объем двигателя"
-          value={formData.engineVolume || ''}
-          onChange={handleChange}
+          value={formData.engineVolume !== null ? formData.engineVolume : ""}
+          onChange={(e) => handleInputChange("engineVolume", e.target.value)}
           className="border p-2 w-full"
         />
 
-        {/* Engine Number */}
         <input
           type="text"
           name="engineNumber"
           placeholder="Номер двигателя"
           value={formData.engineNumber}
-          onChange={handleChange}
+          onChange={(e) => handleInputChange("engineNumber", e.target.value)}
           className="border p-2 w-full"
         />
 
-        {/* Chassis Number */}
         <input
           type="text"
           name="chassisNumber"
           placeholder="Номер шасси"
           value={formData.chassisNumber}
-          onChange={handleChange}
+          onChange={(e) => handleInputChange("chassisNumber", e.target.value)}
           className="border p-2 w-full"
         />
 
-        {/* Body Number */}
         <input
           type="text"
           name="bodyNumber"
           placeholder="Номер кузова"
           value={formData.bodyNumber}
-          onChange={handleChange}
+          onChange={(e) => handleInputChange("bodyNumber", e.target.value)}
           className="border p-2 w-full"
         />
 
-        {/* Color */}
         <input
           type="text"
           name="color"
           placeholder="Цвет"
           value={formData.color}
-          onChange={handleChange}
+          onChange={(e) => handleInputChange("color", e.target.value)}
           className="border p-2 w-full"
         />
 
-        {/* Vehicle Type */}
         <select
           name="vehicleType"
           value={formData.vehicleType}
-          onChange={handleChange}
+          onChange={(e) => handleInputChange("vehicleType", e.target.value)}
           className="border p-2 w-full"
         >
           <option value="">Тип ТС</option>
@@ -350,7 +345,6 @@ const AddVehicleForm = () => {
           <option value="TRAILER">Прицеп</option>
         </select>
 
-        {/* Submit Button */}
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
           Зарегистрировать
         </button>

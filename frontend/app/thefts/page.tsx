@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import { addWanted } from '../../utils/api';
+import { addTheft } from '../../utils/api';
 
-const WantedRegistrationPage: React.FC = () => {
+const TheftRegistrationPage: React.FC = () => {
   const [formData, setFormData] = useState({
     vehicleId: '',
-    additionDate: '',
-    reason: '',
-    status: '',
+    theftDate: '',
+    lat: '',
+    lng: '',
+    description: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -28,28 +29,32 @@ const WantedRegistrationPage: React.FC = () => {
     setSuccessMessage('');
     setErrorMessage('');
     try {
-      await addWanted({
+      await addTheft({
         vehicleId: Number(formData.vehicleId),
-        additionDate: formData.additionDate,
-        reason: formData.reason,
-        status: formData.status,
+        theftDate: formData.theftDate,
+        location: {
+          lat: Number(formData.lat),
+          lng: Number(formData.lng),
+        },
+        description: formData.description,
       });
-      setSuccessMessage('Wanted vehicle registered successfully.');
+      setSuccessMessage('Theft registered successfully.');
       setFormData({
         vehicleId: '',
-        additionDate: '',
-        reason: '',
-        status: '',
+        theftDate: '',
+        lat: '',
+        lng: '',
+        description: '',
       });
     } catch (error) {
-      setErrorMessage('Failed to register wanted vehicle. Please try again.');
+      setErrorMessage('Failed to register theft. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="p-4">
       <button
         onClick={() => window.history.back()}
         className="mb-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"
@@ -68,7 +73,7 @@ const WantedRegistrationPage: React.FC = () => {
           />
         </svg>
       </button>
-      <h1 className="text-2xl font-bold mb-4">Регистрация розыска угнанного ТС</h1>
+      <h1 className="text-2xl font-bold mb-4">Регистрация угона</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="vehicleId" className="block mb-1 font-medium">ID Транспортного средства</label>
@@ -83,38 +88,52 @@ const WantedRegistrationPage: React.FC = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="additionDate" className="block mb-1 font-medium">Дата добавления</label>
+          <label htmlFor="theftDate" className="block mb-1 font-medium">Дата угона</label>
           <input
             type="date"
-            id="additionDate"
-            name="additionDate"
-            value={formData.additionDate}
+            id="theftDate"
+            name="theftDate"
+            value={formData.theftDate}
             onChange={handleChange}
             required
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="reason" className="block mb-1 font-medium">Причина</label>
+          <label htmlFor="lat" className="block mb-1 font-medium">Широта</label>
           <input
-            type="text"
-            id="reason"
-            name="reason"
-            value={formData.reason}
+            type="number"
+            step="any"
+            id="lat"
+            name="lat"
+            value={formData.lat}
             onChange={handleChange}
             required
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="status" className="block mb-1 font-medium">Статус</label>
+          <label htmlFor="lng" className="block mb-1 font-medium">Долгота</label>
           <input
-            type="text"
-            id="status"
-            name="status"
-            value={formData.status}
+            type="number"
+            step="any"
+            id="lng"
+            name="lng"
+            value={formData.lng}
             onChange={handleChange}
             required
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="description" className="block mb-1 font-medium">Описание</label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+            rows={3}
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
@@ -132,4 +151,4 @@ const WantedRegistrationPage: React.FC = () => {
   );
 };
 
-export default WantedRegistrationPage;
+export default TheftRegistrationPage;

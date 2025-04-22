@@ -13,8 +13,10 @@ export default function Home() {
         <li><Link href="/accidents" className="text-blue-500">Регистрация ДТП</Link></li>
         <li><Link href="/wanted" className="text-blue-500">Розыск угнанных ТС</Link></li>
         <li><Link href="/inspection" className="text-blue-500">Техосмотр</Link></li>
+        <li><Link href="/license-plates" className="text-blue-500">Проверка номеров</Link></li>
         <li><Link href="/admin" className="text-blue-500">Администрирование</Link></li>
         <li><Link href="/sales" className="text-blue-500">Купля-продажа авто</Link></li>
+        <li><Link href="/owner" className="text-blue-500">Водители</Link></li>
       </ul>
     </div>
   );

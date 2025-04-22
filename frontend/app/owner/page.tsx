@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import { addWanted } from '../../utils/api';
+import { addOwner, OwnerData } from '../../utils/api';
 
-const WantedRegistrationPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    vehicleId: '',
-    additionDate: '',
-    reason: '',
-    status: '',
+const OwnerRegistrationPage: React.FC = () => {
+  const [formData, setFormData] = useState<OwnerData>({
+    fullName: '',
+    address: '',
+    phone: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -28,28 +27,18 @@ const WantedRegistrationPage: React.FC = () => {
     setSuccessMessage('');
     setErrorMessage('');
     try {
-      await addWanted({
-        vehicleId: Number(formData.vehicleId),
-        additionDate: formData.additionDate,
-        reason: formData.reason,
-        status: formData.status,
-      });
-      setSuccessMessage('Wanted vehicle registered successfully.');
-      setFormData({
-        vehicleId: '',
-        additionDate: '',
-        reason: '',
-        status: '',
-      });
+      await addOwner(formData);
+      setSuccessMessage('Owner registered successfully.');
+      setFormData({ fullName: '', address: '', phone: '' });
     } catch (error) {
-      setErrorMessage('Failed to register wanted vehicle. Please try again.');
+      setErrorMessage('Failed to register owner. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="p-4">
       <button
         onClick={() => window.history.back()}
         className="mb-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"
@@ -68,51 +57,38 @@ const WantedRegistrationPage: React.FC = () => {
           />
         </svg>
       </button>
-      <h1 className="text-2xl font-bold mb-4">Регистрация розыска угнанного ТС</h1>
+      <h1 className="text-2xl font-bold mb-4">Регистрация владельца</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label htmlFor="vehicleId" className="block mb-1 font-medium">ID Транспортного средства</label>
-          <input
-            type="number"
-            id="vehicleId"
-            name="vehicleId"
-            value={formData.vehicleId}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="additionDate" className="block mb-1 font-medium">Дата добавления</label>
-          <input
-            type="date"
-            id="additionDate"
-            name="additionDate"
-            value={formData.additionDate}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="reason" className="block mb-1 font-medium">Причина</label>
+          <label htmlFor="fullName" className="block mb-1 font-medium">ФИО</label>
           <input
             type="text"
-            id="reason"
-            name="reason"
-            value={formData.reason}
+            id="fullName"
+            name="fullName"
+            value={formData.fullName}
             onChange={handleChange}
             required
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="status" className="block mb-1 font-medium">Статус</label>
+          <label htmlFor="address" className="block mb-1 font-medium">Адрес</label>
           <input
-            type="text"
-            id="status"
-            name="status"
-            value={formData.status}
+            id="address"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="phone" className="block mb-1 font-medium">Телефон</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            value={formData.phone}
             onChange={handleChange}
             required
             className="w-full p-2 border border-gray-300 rounded"
@@ -132,4 +108,4 @@ const WantedRegistrationPage: React.FC = () => {
   );
 };
 
-export default WantedRegistrationPage;
+export default OwnerRegistrationPage;

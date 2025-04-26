@@ -1,72 +1,90 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { addOrganization } from '@/utils/api';
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { addOrganization } from "@/utils/api";
+
+interface OrganizationFormData {
+  name: string;
+  district: string;
+  address: string;
+  director: string;
+}
 
 export default function AddOrganizationForm() {
-const [name, setName] = useState('');
-  const [district, setDistrict] = useState('');
-  const [address, setAddress] = useState('');
-  const [director, setDirector] = useState('');
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<OrganizationFormData>();
   const router = useRouter();
 
-const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Обработчик отправки формы
+  const onSubmit = async (data: OrganizationFormData) => {
     try {
-      await addOrganization({ name, district, address, director });
-      router.push('/organizations');
+      await addOrganization(data);
+      reset(); // Очищаем форму после успешной отправки
+      router.push("/organizations");
     } catch (error) {
-      console.error(error);
+      console.error("Ошибка при добавлении организации:", error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Поле "Название организации" */}
       <div>
-<input
+        <input
           type="text"
           id="name"
           placeholder="Название организации"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          required
+          {...register("name", { required: "Это поле обязательно" })}
+          className={`mt-1 block w-full border ${
+            errors.name ? "border-red-500" : "border-gray-300"
+          } rounded-md shadow-sm p-2`}
         />
+        {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
       </div>
+
+      {/* Поле "Район" */}
       <div>
         <input
           type="text"
           id="district"
           placeholder="Район"
-          value={district}
-          onChange={(e) => setDistrict(e.target.value)}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          required
+          {...register("district", { required: "Это поле обязательно" })}
+          className={`mt-1 block w-full border ${
+            errors.district ? "border-red-500" : "border-gray-300"
+          } rounded-md shadow-sm p-2`}
         />
+        {errors.district && <p className="text-red-500 text-sm">{errors.district.message}</p>}
       </div>
+
+      {/* Поле "Адрес" */}
       <div>
         <input
           type="text"
           id="address"
           placeholder="Адрес"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          required
+          {...register("address", { required: "Это поле обязательно" })}
+          className={`mt-1 block w-full border ${
+            errors.address ? "border-red-500" : "border-gray-300"
+          } rounded-md shadow-sm p-2`}
         />
+        {errors.address && <p className="text-red-500 text-sm">{errors.address.message}</p>}
       </div>
+
+      {/* Поле "Директор" */}
       <div>
         <input
           type="text"
           id="director"
           placeholder="Директор"
-          value={director}
-          onChange={(e) => setDirector(e.target.value)}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          required
+          {...register("director", { required: "Это поле обязательно" })}
+          className={`mt-1 block w-full border ${
+            errors.director ? "border-red-500" : "border-gray-300"
+          } rounded-md shadow-sm p-2`}
         />
+        {errors.director && <p className="text-red-500 text-sm">{errors.director.message}</p>}
       </div>
+
+      {/* Кнопка отправки */}
       <button
         type="submit"
         className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"

@@ -1,299 +1,144 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { getVehicles, getOwners, addSalePurchase } from "@/utils/api";
+import React, { useState, useEffect } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import SuggestionInput from '../input/SuggestionInput';
+import { getVehicles, getOwners, addSalePurchase } from '@/utils/api';
 
 interface SalePurchaseFormData {
   vehicleId: number | null;
   date: string;
   cost: number | null;
   buyerId: number | null;
-  buyerName?: string;
   sellerId: number | null;
   sellerName: string;
+  buyerName: string;
 }
 
-interface Suggestion {
-  id: number;
-  name: string;
-}
-
-interface AddSalePurchaseFormProps {
-  onSuccess?: () => void;
-}
-
-const AddSalePurchaseForm: React.FC<AddSalePurchaseFormProps> = ({ onSuccess }) => {
-  const [formData, setFormData] = useState<SalePurchaseFormData>({
-    vehicleId: null,
-    date: "",
-    cost: null,
-    buyerId: null,
-    sellerId: null,
-    sellerName: "",
+const AddSalePurchaseForm = () => {
+  const { register, handleSubmit, setValue, control, reset } = useForm<SalePurchaseFormData>({
+    defaultValues: {
+      vehicleId: null,
+      date: '',
+      cost: null,
+      buyerId: null,
+      sellerId: null,
+      sellerName: '',
+    },
   });
 
+  const sellerId = useWatch({ control, name: 'sellerId' });
   const [vehicles, setVehicles] = useState<any[]>([]);
-  const [owners, setOwners] = useState<any[]>([]);
 
-  // Suggestions for buyer input
-  const [buyerSuggestions, setBuyerSuggestions] = useState<Suggestion[]>([]);
-
-  // Fetch buyer suggestions
-  const fetchBuyerSuggestions = useCallback(
-    async (search: string) => {
-      if (!search) {
-        setBuyerSuggestions([]);
-        return;
-      }
-      try {
-        const response = await getOwners({ search });
-        const ownersData = response.data.content ?? response.data;
-        const formattedSuggestions = ownersData.map((owner: any) => ({
-          id: owner.id,
-          name: owner.fullName || "Unknown Owner",
-        }));
-        setBuyerSuggestions(formattedSuggestions);
-      } catch (error) {
-        console.error("Error fetching buyer suggestions", error);
-      }
-    },
-    []
-  );
-  const [sellerSuggestions, setSellerSuggestions] = useState<Suggestion[]>([]);
-
-  const fetchSellerSuggestions = useCallback(
-    async (search: string) => {
-      if (!search) {
-        setSellerSuggestions([]);
-        return;
-      }
-      try {
-        const response = await getOwners({ search });
-        const ownersData = response.data.content ?? response.data;
-        const formattedSuggestions = ownersData.map((owner: any) => ({
-          id: owner.id,
-          name: owner.fullName || "Unknown Owner",
-        }));
-        setSellerSuggestions(formattedSuggestions);
-      } catch (error) {
-        console.error("Error fetching seller suggestions", error);
-      }
-    },
-    []
-  );
-
+  // Обновление списка транспортных средств при изменении продавца
   useEffect(() => {
-    if (formData.sellerId !== null) {
-      getVehicles({ ownerId: formData.sellerId })
+    if (sellerId) {
+      getVehicles({ ownerId: sellerId })
         .then((response) => {
           const vehiclesData = response.data.content || response.data;
           setVehicles(vehiclesData);
         })
         .catch((error) => {
-          console.error("Error fetching vehicles for seller", error);
+          console.error('Error fetching vehicles for seller', error);
           setVehicles([]);
         });
     } else {
       setVehicles([]);
-      setFormData((prev) => ({ ...prev, vehicleId: null }));
+      setValue('vehicleId', null);
     }
-  }, [formData.sellerId]);
+  }, [sellerId, setValue]);
 
-  useEffect(() => {
-    const fetchOwners = async () => {
-      try {
-        const response = await getOwners({});
-        const ownersData = response.data.content ?? response.data;
-        setOwners(ownersData);
-      } catch (error) {
-        console.error("Error fetching owners", error);
-      }
-    };
-    fetchOwners();
-  }, []);
-
-  const handleInputChange = (name: string, value: string) => {
-    if (name === "sellerName") {
-      setFormData((prev) => ({
-        ...prev,
-        sellerName: value,
-        sellerId: null,
-        vehicleId: null,
-      }));
-      fetchSellerSuggestions(value);
-    } else if (name === "buyerName") {
-      setFormData((prev) => ({
-        ...prev,
-        buyerName: value,
-        buyerId: null,
-      }));
-      fetchBuyerSuggestions(value);
-    } else if (name === "date" || name === "cost" || name === "vehicleId" || name === "buyerId" || name === "sellerId") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value === "" ? null : name === "cost" ? parseFloat(value) : Number(value),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+  const onSuggestionSelect = (suggestion: { id: number; name: string }, field: 'seller' | 'buyer') => {
+    if (field === 'seller') {
+      setValue('sellerName', suggestion.name);
+      setValue('sellerId', suggestion.id);
+      setValue('vehicleId', null);
+    } else if (field === 'buyer') {
+      setValue('buyerName', suggestion.name);
+      setValue('buyerId', suggestion.id);
     }
   };
 
-  const handleSuggestionSelect = (suggestion: Suggestion, field: "seller" | "buyer") => {
-    if (field === "seller") {
-      setFormData((prev) => ({
-        ...prev,
-        sellerName: suggestion.name,
-        sellerId: suggestion.id,
-        vehicleId: null,
-      }));
-      setSellerSuggestions([]);
-    } else if (field === "buyer") {
-      setFormData((prev) => ({
-        ...prev,
-        buyerName: suggestion.name,
-        buyerId: suggestion.id,
-      }));
-      setBuyerSuggestions([]);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (
-      !formData.vehicleId ||
-      !formData.date ||
-      formData.cost === null ||
-      !formData.buyerId ||
-      !formData.sellerId
-    ) {
-      alert("Пожалуйста, заполните все поля");
+  const onSubmit = async (data: SalePurchaseFormData) => {
+    if (!data.vehicleId || !data.date || data.cost === null || !data.buyerId || !data.sellerId) {
+      alert('Пожалуйста, заполните все поля');
       return;
     }
     try {
       await addSalePurchase({
-        vehicleId: formData.vehicleId,
-        date: formData.date,
-        cost: formData.cost,
-        buyerId: formData.buyerId,
-        sellerId: formData.sellerId,
+        vehicleId: data.vehicleId,
+        date: data.date + "T00:00:00",
+        cost: data.cost,
+        buyerId: data.buyerId,
+        sellerId: data.sellerId,
       });
-      alert("Сделка купли-продажи успешно зарегистрирована!");
-      if (onSuccess) {
-        await onSuccess();
-      }
-      setFormData({
+      alert('Сделка купли-продажи успешно зарегистрирована!');
+
+      reset({
         vehicleId: null,
-        date: "",
+        date: '',
         cost: null,
         buyerId: null,
         sellerId: null,
-        sellerName: "",
+        sellerName: '',
       });
       setVehicles([]);
     } catch (error) {
-      console.error("Error adding sale purchase", error);
-      alert("Ошибка при регистрации сделки.");
+      console.error('Error adding sale purchase', error);
+      alert('Ошибка при регистрации сделки.');
     }
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Seller input with suggestions */}
-        <div>
-          <input
-            type="text"
-            name="sellerName"
-            value={formData.sellerName}
-            onChange={(e) => handleInputChange("sellerName", e.target.value)}
-            placeholder="Введите имя продавца"
-            className="border p-2 w-full max-w-full"
-            autoComplete="off"
-          />
-          {sellerSuggestions.length > 0 && (
-            <ul className="border p-2 w-full max-h-40 overflow-y-auto">
-              {sellerSuggestions.map((suggestion) => (
-                <li
-                  key={suggestion.id}
-                  onClick={() => handleSuggestionSelect(suggestion, "seller")}
-                  className="cursor-pointer hover:bg-gray-100 p-2"
-                >
-                  {suggestion.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Поле для продавца */}
+      <SuggestionInput
+        value={(useWatch({ control, name: 'sellerName' }) ?? "") as string}
+        onChange={(value) => setValue('sellerName', value)}
+        onSelect={(suggestion) => onSuggestionSelect(suggestion, 'seller')}
+        fetchData={(search) => getOwners({ search })}
+        placeholder="Введите имя продавца"
+      />
 
-        {/* Vehicle select */}
-        <select
-          name="vehicleId"
-          value={formData.vehicleId ?? ""}
-          onChange={(e) => handleInputChange("vehicleId", e.target.value)}
-          className="border p-2 w-full max-w-full"
-          disabled={!formData.sellerId}
-        >
-          <option value="">Выберите транспортное средство</option>
-          {vehicles.map((vehicle) => (
-            <option key={vehicle.id} value={vehicle.id}>
-              {vehicle.brand?.name ?? "Unknown Brand"} - {vehicle.licensePlate?.licenseNumber ?? "Unknown License Plate"}
-            </option>
-          ))}
-        </select>
+      {/* Выбор транспортного средства */}
+      <select
+        {...register('vehicleId', { valueAsNumber: true })}
+        className="border p-2 w-full max-w-full"
+        disabled={!sellerId}
+      >
+        <option value="">Выберите транспортное средство</option>
+        {vehicles.map((vehicle) => (
+          <option key={vehicle.id} value={vehicle.id}>
+            {vehicle.brand?.name ?? 'Unknown Brand'} - {vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'}
+          </option>
+        ))}
+      </select>
 
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={(e) => handleInputChange("date", e.target.value)}
-          className="border p-2 w-full max-w-full"
-        />
+      {/* Дата и стоимость */}
+      <input type="date" {...register('date')} className="border p-2 w-full max-w-full" />
+      <input
+        type="number"
+        placeholder="Стоимость"
+        {...register('cost', { valueAsNumber: true })}
+        className="border p-2 w-full max-w-full"
+        min="0"
+        step="0.01"
+      />
 
-        <input
-          type="number"
-          name="cost"
-          placeholder="Стоимость"
-          value={formData.cost ?? ""}
-          onChange={(e) => handleInputChange("cost", e.target.value)}
-          className="border p-2 w-full max-w-full"
-          min="0"
-          step="0.01"
-        />
+      {/* Поле для покупателя */}
+      <SuggestionInput
+        value={(useWatch({ control, name: 'buyerName' }) ?? "") as string}
+        onChange={(value) => setValue('buyerName', value)}
+        onSelect={(suggestion) => onSuggestionSelect(suggestion, 'buyer')}
+        fetchData={(search) => getOwners({ search })}
+        placeholder="Введите имя покупателя"
+      />
 
-        {/* Buyer input with suggestions */}
-        <div>
-          <input
-            type="text"
-            name="buyerName"
-            value={formData.buyerName || ""}
-            onChange={(e) => handleInputChange("buyerName", e.target.value)}
-            placeholder="Введите имя покупателя"
-            className="border p-2 w-full max-w-full"
-            autoComplete="off"
-          />
-          {buyerSuggestions.length > 0 && (
-            <ul className="border p-2 w-full max-h-40 overflow-y-auto">
-              {buyerSuggestions.map((suggestion) => (
-                <li
-                  key={suggestion.id}
-                  onClick={() => handleSuggestionSelect(suggestion, "buyer")}
-                  className="cursor-pointer hover:bg-gray-100 p-2"
-                >
-                  {suggestion.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Зарегистрировать сделку
-        </button>
-      </form>
-    </>
+      {/* Кнопка отправки */}
+      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+        Зарегистрировать сделку
+      </button>
+    </form>
   );
 };
 

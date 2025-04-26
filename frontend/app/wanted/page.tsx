@@ -1,53 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
-import { addWanted } from '../../utils/api';
+import React from 'react';
+import AddWantedForm from '../../components/forms/AddWantedForm';
 
 const WantedRegistrationPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    vehicleId: '',
-    additionDate: '',
-    reason: '',
-    status: '',
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setSuccessMessage('');
-    setErrorMessage('');
-    try {
-      await addWanted({
-        vehicleId: Number(formData.vehicleId),
-        additionDate: formData.additionDate,
-        reason: formData.reason,
-        status: formData.status,
-      });
-      setSuccessMessage('Wanted vehicle registered successfully.');
-      setFormData({
-        vehicleId: '',
-        additionDate: '',
-        reason: '',
-        status: '',
-      });
-    } catch (error) {
-      setErrorMessage('Failed to register wanted vehicle. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <button
@@ -69,65 +25,7 @@ const WantedRegistrationPage: React.FC = () => {
         </svg>
       </button>
       <h1 className="text-2xl font-bold mb-4">Регистрация розыска угнанного ТС</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="vehicleId" className="block mb-1 font-medium">ID Транспортного средства</label>
-          <input
-            type="number"
-            id="vehicleId"
-            name="vehicleId"
-            value={formData.vehicleId}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="additionDate" className="block mb-1 font-medium">Дата добавления</label>
-          <input
-            type="date"
-            id="additionDate"
-            name="additionDate"
-            value={formData.additionDate}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="reason" className="block mb-1 font-medium">Причина</label>
-          <input
-            type="text"
-            id="reason"
-            name="reason"
-            value={formData.reason}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="status" className="block mb-1 font-medium">Статус</label>
-          <input
-            type="text"
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"
-        >
-          {loading ? 'Регистрация...' : 'Зарегистрировать'}
-        </button>
-      </form>
-      {successMessage && <p className="text-green-600 mt-4">{successMessage}</p>}
-      {errorMessage && <p className="text-red-600 mt-4">{errorMessage}</p>}
+      <AddWantedForm />
     </div>
   );
 };

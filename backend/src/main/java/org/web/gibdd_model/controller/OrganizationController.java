@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.model.Organization;
 import org.web.gibdd_model.repository.OrganizationRepository;
+import org.web.gibdd_model.service.OrganizationService;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -17,6 +19,9 @@ public class OrganizationController {
 
     @Autowired
     private OrganizationRepository organizationRepository;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @GetMapping
     public Page<Organization> getOrganizations(
@@ -28,6 +33,17 @@ public class OrganizationController {
             return organizationRepository.findByNameContaining(search, pageable);
         }
         return organizationRepository.findAll(pageable);
+    }
+
+    @GetMapping("/number-filter")
+    public List<Object[]> getOrganizationsByNumberFilter(
+            @RequestParam(required = false) String series,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        // Parse dates if provided
+        java.time.LocalDate start = (startDate != null && !startDate.isEmpty()) ? java.time.LocalDate.parse(startDate) : java.time.LocalDate.MIN;
+        java.time.LocalDate end = (endDate != null && !endDate.isEmpty()) ? java.time.LocalDate.parse(endDate) : java.time.LocalDate.MAX;
+        return organizationService.getOrganizationsByLicense(series, start, end);
     }
 
     @PostMapping

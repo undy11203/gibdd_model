@@ -1,33 +1,66 @@
-"use client";
+'use client';
 
-import React from 'react';
-import AddWantedForm from '../../components/forms/AddWantedForm';
+import { useState } from 'react';
+import TabNav from '../../components/common/TabNav';
+import BackButton from '../../components/common/BackButton';
+import WantedVehiclesDisplay from '../../components/pro_search/WantedVehiclesDisplay';
+import AddWantedVehicleForm from '../../components/forms/AddWantedVehicleForm';
 
-const WantedRegistrationPage: React.FC = () => {
+const tabs = [
+  { id: 'list', label: 'Список розыска' },
+  { id: 'add', label: 'Добавить в розыск' }
+];
+
+export default function WantedPage() {
+  const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleAddSuccess = () => {
+    setActiveTab('list');
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <button
-        onClick={() => window.history.back()}
-        className="mb-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"
-        aria-label="Go back"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-      <h1 className="text-2xl font-bold mb-4">Регистрация розыска угнанного ТС</h1>
-      <AddWantedForm />
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <BackButton className="mb-0" />
+          <h1 className="text-3xl font-bold">Розыск транспортных средств</h1>
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <TabNav 
+          tabs={tabs} 
+          activeTab={activeTab} 
+          onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
+        />
+      </div>
+
+      {activeTab === 'list' && (
+        <>
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Здесь вы можете просмотреть информацию о транспортных средствах в розыске, 
+              включая угнанные автомобили и скрывшихся с места ДТП, а также статистику 
+              эффективности розыскной работы.
+            </p>
+          </div>
+          <WantedVehiclesDisplay key={refreshTrigger} />
+        </>
+      )}
+
+      {activeTab === 'add' && (
+        <>
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Заполните форму для добавления транспортного средства в розыск. 
+              Убедитесь, что указанный номерной знак зарегистрирован в системе.
+            </p>
+          </div>
+          <AddWantedVehicleForm onSuccess={handleAddSuccess} />
+        </>
+      )}
     </div>
   );
-};
-
-export default WantedRegistrationPage;
+}

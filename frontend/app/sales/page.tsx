@@ -1,44 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getSalePurchases } from '../../utils/api';
-import { SalePurchase } from '../../types/salePurchase';
-import SaleCard from '../../components/SaleCard';
 import AddSalePurchaseForm from '../../components/forms/AddSalePurchaseForm';
 
-const SalesPage: React.FC = () => {
-  const [sales, setSales] = useState<SalePurchase[]>([]);
-  const [filteredSales, setFilteredSales] = useState<SalePurchase[]>([]);
-  const [vehicle, setVehicle] = useState('');
-  const [date, setDate] = useState('');
-  const [buyer, setBuyer] = useState('');
-  const [seller, setSeller] = useState('');
-
-  const fetchSales = async () => {
-    try {
-      const response = await getSalePurchases();
-      setSales(response.data);
-      setFilteredSales(response.data);
-    } catch (error) {
-      console.error('Error fetching sales:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchSales();
-  }, []);
-
-  const handleSearch = (searchCriteria: any) => {
-    const filtered = sales.filter(sale => {
-      return (
-        (!searchCriteria.vehicle || sale.vehicle.model.includes(searchCriteria.vehicle)) &&
-        (!searchCriteria.date || sale.date === searchCriteria.date) &&
-        (!searchCriteria.buyer || sale.buyer.name.includes(searchCriteria.buyer)) &&
-        (!searchCriteria.seller || sale.seller.name.includes(searchCriteria.seller))
-      );
-    });
-    setFilteredSales(filtered);
-  };
+const SalesPage = () => {
 
   return (
     <div className="p-4">
@@ -60,7 +25,7 @@ const SalesPage: React.FC = () => {
         </svg>
       </button>
       <h1 className="text-2xl font-bold mb-4">Sales Transactions</h1>
-      <AddSalePurchaseForm onSuccess={fetchSales} />
+      <AddSalePurchaseForm />
       
     </div>
   );

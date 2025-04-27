@@ -1,4 +1,3 @@
-
 package org.web.gibdd_model.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +6,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.web.gibdd_model.dto.*;
 import org.web.gibdd_model.model.Accident;
+import org.web.gibdd_model.model.enums.AccidentType;
 import org.web.gibdd_model.service.AccidentService;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -32,8 +34,13 @@ public class AccidentController {
     }
 
     @PostMapping
-    public Accident createAccident(@RequestBody Accident accident) {
-        return accidentService.createAccident(accident);
+    public ResponseEntity<Accident> createAccident(@RequestBody CreateAccidentDTO createAccidentDTO) {
+        try {
+            Accident accident = accidentService.createAccident(createAccidentDTO);
+            return ResponseEntity.ok(accident);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -56,5 +63,26 @@ public class AccidentController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<List<AccidentStatisticsDTO>> getAccidentStatistics(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate,
+            @RequestParam(required = false) AccidentType type) {
+        List<AccidentStatisticsDTO> statistics = accidentService.getAccidentStatistics(startDate, endDate, type);
+        return ResponseEntity.ok(statistics);
+    }
+
+    @GetMapping("/analysis")
+    public ResponseEntity<AccidentAnalysisDTO> getAccidentAnalysis() {
+        AccidentAnalysisDTO analysis = accidentService.getAccidentAnalysis();
+        return ResponseEntity.ok(analysis);
+    }
+
+    @GetMapping("/drunk-driving-stats")
+    public ResponseEntity<DrunkDrivingStatsDTO> getDrunkDrivingStatistics() {
+        DrunkDrivingStatsDTO stats = accidentService.getDrunkDrivingStatistics();
+        return ResponseEntity.ok(stats);
     }
 }

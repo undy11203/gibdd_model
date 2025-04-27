@@ -18,6 +18,7 @@ import org.web.gibdd_model.repository.OwnerRepository;
 import org.web.gibdd_model.repository.OrganizationRepository;
 import org.web.gibdd_model.repository.AlarmSystemRepository;
 import org.web.gibdd_model.repository.LicensePlateRepository;
+import org.web.gibdd_model.service.VehicleService;
 
 import java.util.Optional;
 
@@ -43,6 +44,9 @@ public class VehicleController {
     @Autowired
     private LicensePlateRepository licensePlateRepository;
 
+    @Autowired
+    private VehicleService vehicleService;
+
     @GetMapping
     public ResponseEntity<Page<Vehicle>> getVehicles(
             @RequestParam(required = false) String type,
@@ -62,6 +66,24 @@ public class VehicleController {
         }
         System.out.println("Size of vehicles: " + vehicles.getContent().size());
         return ResponseEntity.ok(vehicles);
+    }
+
+    @GetMapping("/owner-by-license")
+    public ResponseEntity<?> getOwnerByLicense(@RequestParam String licenseNumber) {
+        var owner = vehicleService.getOwnerByLicenseNumber(licenseNumber);
+        if (owner == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(owner);
+    }
+
+    @GetMapping("/dossier-by-license")
+    public ResponseEntity<?> getVehicleDossierByLicense(@RequestParam String licenseNumber) {
+        var dossier = vehicleService.getVehicleDossier(licenseNumber);
+        if (dossier == null || dossier.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dossier);
     }
 
     @PostMapping

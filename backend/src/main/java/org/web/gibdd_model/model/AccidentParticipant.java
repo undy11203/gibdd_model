@@ -18,8 +18,8 @@ public class AccidentParticipant {
     private Accident accident;
 
     @ManyToOne
-    @JoinColumn(name = "vehicle_id", nullable = false)
-    private Vehicle vehicle;
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Owner owner;
 
     @Enumerated(EnumType.STRING)
     private AccidentRole role;

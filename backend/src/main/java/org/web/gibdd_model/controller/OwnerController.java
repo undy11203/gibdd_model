@@ -8,7 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.model.Owner;
 import org.web.gibdd_model.repository.OwnerRepository;
+import org.web.gibdd_model.service.OwnerService;
+import org.web.gibdd_model.dto.OwnerOverdueInspectionDTO;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -17,6 +20,9 @@ public class OwnerController {
 
     @Autowired
     private OwnerRepository ownerRepository;
+
+    @Autowired
+    private OwnerService ownerService;
 
     @GetMapping
     public Page<Owner> getOwners(
@@ -58,5 +64,10 @@ public class OwnerController {
             ownerRepository.delete(owner);
             return ResponseEntity.<Void>ok().build();
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/overdue-inspections")
+    public List<OwnerOverdueInspectionDTO> getOwnersWithOverdueInspections() {
+        return ownerService.getOwnersWithOverdueInspection();
     }
 }

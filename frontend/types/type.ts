@@ -42,6 +42,14 @@ export interface Brand {
   theftPopularity: string;
 }
 
+export enum AccidentType {
+  COLLISION = 'COLLISION', // Столкновение
+  OVERTURNING = 'OVERTURNING', // Опрокидывание
+  HIT_AND_RUN = 'HIT_AND_RUN', // Наезд и скрытие
+  PEDESTRIAN_HIT = 'PEDESTRIAN_HIT', // Наезд на пешехода
+  OTHER = 'OTHER' // Прочие
+}
+
 export interface LicensePlate {
   licenseNumber: string;
   number: number;
@@ -117,14 +125,6 @@ export enum AccidentRole {
   CULPRIT = 'CULPRIT',
   VICTIM = 'VICTIM',
   WITNESS = 'WITNESS'
-}
-
-export enum AccidentType {
-  COLLISION = 'COLLISION',
-  OVERTURNING = 'OVERTURNING',
-  HIT_AND_RUN = 'HIT_AND_RUN',
-  PEDESTRIAN_HIT = 'PEDESTRIAN_HIT',
-  OTHER = 'OTHER'
 }
 
 export enum Reliability {

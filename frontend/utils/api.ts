@@ -304,9 +304,13 @@ export const getVehicleDossierByLicensePlate = (licenseNumber: string) =>
   apiClient.get(`/vehicles/dossier-by-license`, { params: { licenseNumber } });
 
 // Add SQL query execution endpoint
-export interface QueryResult {
-  [key: string]: any;
+export interface SqlQueryResponse {
+  success: boolean;
+  message?: string;
+  rowsAffected?: number;
+  results?: Array<{ [key: string]: any }>;
+  error?: string;
 }
 
 export const executeRawQuery = (query: string) => 
-  apiClient.post<QueryResult[]>('/admin/execute-query', { query });
+  apiClient.post<SqlQueryResponse>('/admin/execute-query', { query });

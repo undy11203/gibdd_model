@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { executeRawQuery } from '@/utils/api';
+import { executeRawQuery } from '../../utils/api';
 
 interface QueryResult {
   columns: string[];
@@ -24,19 +24,34 @@ const SqlQueryExecutor = () => {
     try {
       const response = await executeRawQuery(query.trim());
       const data = response.data;
+      console.log('Response:', data);
       
-      if (data.length > 0) {
-        // Extract column names from the first row
-        const columns = Object.keys(data[0]);
-        setResult({
-          columns,
-          rows: data
-        });
+      if (data.success) {
+        if (data.results && data.results.length > 0) {
+          // Extract column names from the first result
+          const columns = Object.keys(data.results[0]);
+          setResult({
+            columns,
+            rows: data.results
+          });
+        } else if (data.rowsAffected !== undefined) {
+          // Handle DML queries (INSERT, UPDATE, DELETE)
+          setResult({
+            columns: ['Affected Rows'],
+            rows: [{ 'Affected Rows': data.rowsAffected }]
+          });
+        } else {
+          setResult({
+            columns: [],
+            rows: [],
+            error: 'Запрос выполнен успешно, но не вернул данных'
+          });
+        }
       } else {
         setResult({
           columns: [],
           rows: [],
-          error: 'Запрос выполнен успешно, но не вернул данных'
+          error: data.error || 'Ошибка при выполнении запроса'
         });
       }
     } catch (err: any) {

@@ -80,7 +80,7 @@ public class VehicleController {
     @GetMapping("/dossier-by-license")
     public ResponseEntity<?> getVehicleDossierByLicense(@RequestParam String licenseNumber) {
         var dossier = vehicleService.getVehicleDossier(licenseNumber);
-        if (dossier == null || dossier.isEmpty()) {
+        if (dossier == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(dossier);

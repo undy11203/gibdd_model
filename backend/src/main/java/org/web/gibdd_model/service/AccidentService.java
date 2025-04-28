@@ -14,6 +14,8 @@ import org.web.gibdd_model.dto.*;
 import org.web.gibdd_model.model.Accident;
 import org.web.gibdd_model.model.AccidentParticipant;
 import org.web.gibdd_model.model.Vehicle;
+import org.web.gibdd_model.model.Owner;
+import java.util.ArrayList;
 import org.web.gibdd_model.model.enums.AccidentType;
 import org.web.gibdd_model.repository.AccidentRepository;
 import org.web.gibdd_model.repository.VehicleRepository;
@@ -31,6 +33,7 @@ public class AccidentService {
 
     @Autowired
     private VehicleRepository vehicleRepository;
+
 
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
@@ -68,17 +71,20 @@ public class AccidentService {
         // Process participants
         if (dto.getParticipants() != null && !dto.getParticipants().isEmpty()) {
             for (CreateAccidentDTO.ParticipantDTO participantDTO : dto.getParticipants()) {
-                Vehicle vehicle = vehicleRepository.findByLicensePlateLicenseNumber(
+                Vehicle vehicle = vehicleRepository.findByLicensePlate(
                     participantDTO.getLicensePlate()
-                ).orElseThrow(() -> new RuntimeException("Vehicle not found with license plate: " + 
-                    participantDTO.getLicensePlate()));
+                );
+
+                Owner owner = vehicle.getOwner();
+                if (owner == null) {
+                    throw new RuntimeException("Vehicle has no registered owner: " + participantDTO.getLicensePlate());
+                }
 
                 AccidentParticipant participant = new AccidentParticipant();
                 participant.setAccident(accident);
-                participant.setVehicle(vehicle);
+                participant.setOwner(owner);
                 participant.setRole(participantDTO.getRole());
                 
-                accident.getParticipants().add(participant);
             }
         }
 
@@ -111,99 +117,133 @@ public class AccidentService {
     }
 
     public List<AccidentStatisticsDTO> getAccidentStatistics(LocalDate startDate, LocalDate endDate, AccidentType type) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date must not be null");
+        }
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date must be before or equal to end date");
+        }
+
         List<Object[]> statistics;
         if (type != null) {
             statistics = accidentRepository.findByDateBetweenAndType(startDate, endDate, type.toString(), PageRequest.of(0, Integer.MAX_VALUE))
                     .stream()
+                    .filter(accident -> accident != null && accident.getType() != null)
                     .map(accident -> new Object[]{
                             accident.getType(),
                             1L,
-                            accident.getDamageAmount(),
-                            accident.getVictimsCount()
+                            accident.getDamageAmount() != null ? accident.getDamageAmount() : 0.0,
+                            accident.getVictimsCount() != null ? accident.getVictimsCount() : 0
                     })
                     .collect(Collectors.toList());
         } else {
             statistics = accidentRepository.getAccidentStatistics(startDate, endDate);
         }
 
-        return statistics.stream()
-                .collect(Collectors.groupingBy(
-                        row -> AccidentType.valueOf(row[0].toString()),
-                        Collectors.collectingAndThen(
-                                Collectors.toList(),
-                                list -> {
-                                    long count = list.size();
-                                    double avgDamage = list.stream()
-                                            .mapToDouble(row -> row[2] != null ? ((Number) row[2]).doubleValue() : 0.0)
-                                            .average()
-                                            .orElse(0.0);
-                                    int totalVictims = list.stream()
-                                            .mapToInt(row -> row[3] != null ? ((Number) row[3]).intValue() : 0)
-                                            .sum();
-                                    return new AccidentStatisticsDTO(
-                                            AccidentType.valueOf(list.get(0)[0].toString()),
-                                            count,
-                                            avgDamage,
-                                            totalVictims
-                                    );
-                                }
-                        )
-                ))
-                .values()
-                .stream()
-                .collect(Collectors.toList());
+        if (statistics == null || statistics.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        try {
+            return statistics.stream()
+                    .filter(row -> row != null && row[0] != null)
+                    .collect(Collectors.groupingBy(
+                            row -> AccidentType.valueOf(row[0].toString()),
+                            Collectors.collectingAndThen(
+                                    Collectors.toList(),
+                                    list -> {
+                                        long count = list.size();
+                                        double avgDamage = list.stream()
+                                                .mapToDouble(row -> row[2] != null ? ((Number) row[2]).doubleValue() : 0.0)
+                                                .average()
+                                                .orElse(0.0);
+                                        int totalVictims = list.stream()
+                                                .mapToInt(row -> row[3] != null ? ((Number) row[3]).intValue() : 0)
+                                                .sum();
+                                        return new AccidentStatisticsDTO(
+                                                AccidentType.valueOf(list.get(0)[0].toString()),
+                                                count,
+                                                avgDamage,
+                                                totalVictims
+                                        );
+                                    }
+                            )
+                    ))
+                    .values()
+                    .stream()
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error processing accident statistics: Invalid accident type", e);
+        }
     }
 
     public AccidentAnalysisDTO getAccidentAnalysis() {
         AccidentAnalysisDTO analysis = new AccidentAnalysisDTO();
 
-        // Get dangerous locations
-        List<Object[]> dangerousLocationsData = accidentRepository.getDangerousLocations();
-        List<AccidentAnalysisDTO.DangerousLocationDTO> dangerousLocations = dangerousLocationsData.stream()
-                .map(row -> {
-                    AccidentAnalysisDTO.DangerousLocationDTO location = new AccidentAnalysisDTO.DangerousLocationDTO();
-                    Point point = (Point) row[0];
-                    location.setLatitude(point.getY()); // Latitude is Y coordinate
-                    location.setLongitude(point.getX()); // Longitude is X coordinate
-                    location.setAccidentCount(((Number) row[1]).longValue());
-                    location.setAverageDamage(((Number) row[2]).doubleValue());
-                    location.setTotalVictims(((Number) row[3]).intValue());
-                    return location;
-                })
-                .collect(Collectors.toList());
-        analysis.setDangerousLocations(dangerousLocations);
+        try {
+            // Get dangerous locations
+            List<Object[]> dangerousLocationsData = accidentRepository.getDangerousLocations();
+            if (dangerousLocationsData == null) {
+                dangerousLocationsData = new ArrayList<>();
+            }
+            
+            List<AccidentAnalysisDTO.DangerousLocationDTO> dangerousLocations = dangerousLocationsData.stream()
+                    .filter(row -> row != null && row[0] != null)
+                    .map(row -> {
+                        AccidentAnalysisDTO.DangerousLocationDTO location = new AccidentAnalysisDTO.DangerousLocationDTO();
+                        Point point = (Point) row[0];
+                        location.setLatitude(point.getY()); // Latitude is Y coordinate
+                        location.setLongitude(point.getX()); // Longitude is X coordinate
+                        location.setAccidentCount(row[1] != null ? ((Number) row[1]).longValue() : 0L);
+                        location.setAverageDamage(row[2] != null ? ((Number) row[2]).doubleValue() : 0.0);
+                        location.setTotalVictims(row[3] != null ? ((Number) row[3]).intValue() : 0);
+                        return location;
+                    })
+                    .collect(Collectors.toList());
+            analysis.setDangerousLocations(dangerousLocations);
 
-        // Get most frequent cause
-        List<Object[]> causeData = accidentRepository.getMostFrequentCauseOfAccidents();
-        if (!causeData.isEmpty()) {
-            Object[] mostFrequentCause = causeData.get(0); // Get the first (most frequent) cause
-            AccidentAnalysisDTO.CauseAnalysisDTO causeAnalysis = new AccidentAnalysisDTO.CauseAnalysisDTO();
-            causeAnalysis.setCause((String) mostFrequentCause[0]);
-            causeAnalysis.setAccidentCount(((Number) mostFrequentCause[1]).longValue());
-            
-            // Calculate percentage
-            long totalAccidents = accidentRepository.count();
-            double percentage = (causeAnalysis.getAccidentCount() * 100.0) / totalAccidents;
-            causeAnalysis.setPercentageOfTotal(percentage);
-            
-            analysis.setMostFrequentCause(causeAnalysis);
+            // Get most frequent cause
+            List<Object[]> causeData = accidentRepository.getMostFrequentCauseOfAccidents();
+            if (!causeData.isEmpty() && causeData.get(0) != null && causeData.get(0)[0] != null) {
+                Object[] mostFrequentCause = causeData.get(0); // Get the first (most frequent) cause
+                AccidentAnalysisDTO.CauseAnalysisDTO causeAnalysis = new AccidentAnalysisDTO.CauseAnalysisDTO();
+                causeAnalysis.setCause((String) mostFrequentCause[0]);
+                causeAnalysis.setAccidentCount(((Number) mostFrequentCause[1]).longValue());
+                
+                // Calculate percentage
+                long totalAccidents = accidentRepository.count();
+                if (totalAccidents > 0) {
+                    double percentage = (causeAnalysis.getAccidentCount() * 100.0) / totalAccidents;
+                    causeAnalysis.setPercentageOfTotal(percentage);
+                } else {
+                    causeAnalysis.setPercentageOfTotal(0.0);
+                }
+                
+                analysis.setMostFrequentCause(causeAnalysis);
+            }
+
+            return analysis;
+        } catch (Exception e) {
+            throw new RuntimeException("Error processing accident analysis data", e);
         }
-
-        return analysis;
     }
 
     public DrunkDrivingStatsDTO getDrunkDrivingStatistics() {
-        List<Object[]> statsData = accidentRepository.getDrunkDrivingStatistics();
-        if (!statsData.isEmpty()) {
-            Object[] stats = statsData.get(0);
-            DrunkDrivingStatsDTO dto = new DrunkDrivingStatsDTO();
-            dto.setTotalAccidents(((Number) stats[0]).longValue());
-            dto.setDrunkDrivingAccidents(((Number) stats[1]).longValue());
-            dto.setDrunkDrivingPercentage(((Number) stats[2]).doubleValue());
-            dto.setAverageDamageAmount(((Number) stats[3]).doubleValue());
-            dto.setTotalVictims(((Number) stats[4]).intValue());
-            return dto;
+        try {
+            List<Object[]> statsData = accidentRepository.getDrunkDrivingStatistics();
+            if (statsData != null && !statsData.isEmpty() && statsData.get(0) != null) {
+                Object[] stats = statsData.get(0);
+                DrunkDrivingStatsDTO dto = new DrunkDrivingStatsDTO();
+                dto.setTotalAccidents(stats[0] != null ? ((Number) stats[0]).longValue() : 0L);
+                dto.setDrunkDrivingAccidents(stats[1] != null ? ((Number) stats[1]).longValue() : 0L);
+                dto.setDrunkDrivingPercentage(stats[2] != null ? ((Number) stats[2]).doubleValue() : 0.0);
+                dto.setAverageDamageAmount(stats[3] != null ? ((Number) stats[3]).doubleValue() : 0.0);
+                dto.setTotalVictims(stats[4] != null ? ((Number) stats[4]).intValue() : 0);
+                return dto;
+            }
+            return new DrunkDrivingStatsDTO();
+        } catch (Exception e) {
+            throw new RuntimeException("Error processing drunk driving statistics", e);
         }
-        return new DrunkDrivingStatsDTO();
     }
 }

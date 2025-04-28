@@ -2,6 +2,7 @@ package org.web.gibdd_model.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.web.gibdd_model.model.Vehicle;
 import org.web.gibdd_model.repository.VehicleRepository;
 
 import java.util.List;

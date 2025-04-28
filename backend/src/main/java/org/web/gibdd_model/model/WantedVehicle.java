@@ -24,6 +24,8 @@ public class WantedVehicle {
 
     private String reason;
 
+    private LocalDate foundDate;
+
     @Enumerated(EnumType.STRING)
     private WantedStatus status;
 }

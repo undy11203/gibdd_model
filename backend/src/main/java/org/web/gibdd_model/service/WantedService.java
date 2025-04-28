@@ -63,8 +63,8 @@ public class WantedService {
     public WantedVehicle markAsFound(Long id, LocalDate foundDate) {
         return wantedVehicleRepository.findById(id)
                 .map(vehicle -> {
-                    vehicle.setStatus("FOUND");
-                    vehicle.setFoundDate(foundDate);
+                    vehicle.setStatus(org.web.gibdd_model.model.enums.WantedStatus.FOUND);
+                    vehicle.setAddedDate(foundDate);
                     return wantedVehicleRepository.save(vehicle);
                 })
                 .orElseThrow(() -> new RuntimeException("Wanted vehicle not found with id: " + id));

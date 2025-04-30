@@ -3,7 +3,7 @@
 import React from "react";
 import { useForm, useWatch } from "react-hook-form";
 import SuggestionInput from "../input/SuggestionInput"; // Импортируем компонент
-import { addWanted, getOwners, getVehicles } from "../../utils/api";
+import { addWanted, getOwners, getVehicles } from "@/utils/api";
 
 interface WantedFormData {
   vehicleId: number | null;
@@ -41,7 +41,7 @@ const AddWantedForm = () => {
     if (ownerId) {
       getVehicles({ ownerId })
         .then((response) => {
-          const vehiclesData = response.data.content || response.data;
+          const vehiclesData = response.content;
           setVehicles(vehiclesData);
         })
         .catch((error) => {

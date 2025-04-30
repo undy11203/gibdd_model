@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AccidentAnalysis, DrunkDrivingStats, getAccidentAnalysis, getDrunkDrivingStats } from '../../utils/api';
+import { AccidentAnalysis, DrunkDrivingStats } from "@/types";
+import { getAccidentAnalysis, getDrunkDrivingStats } from '@/utils/api';
 
 //6. Получить результаты анализа ДТП: самые опасные места в городе, самая частая причина ДТП.
 //7. Получить данные о количестве ДТП, совершаемых водителями в нетрезвом виде и доля таких происшествий в общем количестве ДТП.
@@ -20,8 +21,8 @@ const AccidentAnalysisDisplay = () => {
           getAccidentAnalysis(),
           getDrunkDrivingStats()
         ]);
-        setAnalysis(analysisData.data);
-        setDrunkStats(drunkStatsData.data);
+        setAnalysis(analysisData);
+        setDrunkStats(drunkStatsData);
       } catch (err) {
         console.error(err);
         setError('Ошибка при загрузке данных');

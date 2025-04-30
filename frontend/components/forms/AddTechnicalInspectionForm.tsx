@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { addInspection, getOwners, getVehicles } from "@/utils/api";
-import { Owner, Vehicle } from "@/types/type";
+import { Owner, Vehicle } from "@/types";
 import SuggestionInput from "../input/SuggestionInput"; // Импортируем компонент
 
 interface TechnicalInspectionFormData {
@@ -44,7 +44,7 @@ const AddTechnicalInspectionForm = () => {
     if (ownerId) {
       getVehicles({ ownerId })
         .then((response) => {
-          const vehiclesData = response.data.content || response.data;
+          const vehiclesData = response.content;
           setVehicles(vehiclesData);
         })
         .catch((error) => {

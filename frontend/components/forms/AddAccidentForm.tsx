@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { AccidentType, AccidentRole } from '../../types/type';
-import { AccidentData, addAccident, getVehicleByLicensePlate } from '../../utils/api';
+import { AccidentData, AccidentType, AccidentRole } from '@/types';
+import { addAccident, getVehicleByLicensePlate } from '../../utils/api';
 
 interface ParticipantData {
   licensePlate: string;
@@ -85,8 +85,8 @@ const AddAccidentForm = () => {
       const preparedData: AccidentData = {
         date: data.date,
         location: {
-          lat: parseFloat(data.latitude),
-          lng: parseFloat(data.longitude)
+          latitude: parseFloat(data.latitude),
+          longitude: parseFloat(data.longitude)
         },
         type: data.type,
         description: data.description,

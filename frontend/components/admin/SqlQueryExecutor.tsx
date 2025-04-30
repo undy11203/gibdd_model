@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { executeRawQuery } from '../../utils/api';
+import { executeRawQuery } from '@/utils/api/';
+import { SqlQueryResponse } from '@/types/admin';
 
 interface QueryResult {
   columns: string[];
@@ -22,8 +23,7 @@ const SqlQueryExecutor = () => {
 
     setLoading(true);
     try {
-      const response = await executeRawQuery(query.trim());
-      const data = response.data;
+      const data = await executeRawQuery(query.trim());
       console.log('Response:', data);
       
       if (data.success) {

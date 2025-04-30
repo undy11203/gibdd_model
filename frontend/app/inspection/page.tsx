@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AddTechnicalInspectionForm from '@/components/forms/AddTechnicalInspectionForm';
-import { getInspections as getTechnicalInspections } from '@/utils/api';
-import { TechnicalInspection } from '@/types/type';
+import AddTechnicalInspectionForm from '../../components/forms/AddTechnicalInspectionForm';
+import { getInspections, TechnicalInspection } from '@/utils/api';
 
 export default function InspectionPage() {
   const [inspections, setInspections] = useState<TechnicalInspection[]>([]);
@@ -14,8 +13,8 @@ export default function InspectionPage() {
   useEffect(() => {
     const fetchInspections = async () => {
       try {
-        const response = await getTechnicalInspections({});
-        setInspections(response.data.content);
+        const response = await getInspections({});
+        setInspections(response.content);
       } catch (error) {
         console.error(error);
       }
@@ -54,9 +53,9 @@ export default function InspectionPage() {
       </ul>
 
       <h2 className="text-xl font-semibold mb-2">Register Technical Inspection</h2>
-<div>
-  <AddTechnicalInspectionForm />
-</div>
+      <div>
+        <AddTechnicalInspectionForm />
+      </div>
     </div>
   );
-};
+}

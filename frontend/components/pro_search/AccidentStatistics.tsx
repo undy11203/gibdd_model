@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { AccidentStatisticsDTO, getAccidentStatistics } from '../../utils/api';
-import { AccidentType } from '../../types/type';
+import { AccidentStatisticsDTO } from "@/types"
+import { getAccidentStatistics } from '@/utils/api';
+import { AccidentType } from '@/types';
 
 //5. Получить статистику по любому типу ДТП за указанный период.
 const AccidentStatistics = () => {
@@ -35,7 +36,7 @@ const AccidentStatistics = () => {
         endDate,
         type: selectedType || undefined
       });
-      setStatistics(response.data);
+      setStatistics(response);
     } catch (err) {
       setError('Ошибка при получении статистики');
       console.error(err);

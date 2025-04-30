@@ -1,23 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getOrganizations, getOrganizationsByNumberFilter } from '../../utils/api';
-
-interface Organization {
-  id: number;
-  name: string;
-  district: string;
-  address: string;
-  director: string;
-}
-
-interface PageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
+import { getOrganizations, getOrganizationsByNumberFilter } from '../../utils/api/organizations';
+import { Organization } from '../../types/organizations';
+import { PageResponse } from '../../types/common';
 
 const OrganizationsDisplay = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -48,10 +34,9 @@ const OrganizationsDisplay = () => {
         response = await getOrganizations({ page, limit: 10 });
       }
 
-      const pageData = response.data as PageResponse<Organization>;
-      setOrganizations(pageData.content);
-      setTotalCount(pageData.totalElements);
-      setTotalPages(pageData.totalPages);
+      setOrganizations(response.content);
+      setTotalCount(response.totalElements);
+      setTotalPages(response.totalPages);
     } catch (err) {
       console.error(err);
       setError('Ошибка при загрузке данных');

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { getOrganizationsByNumberFilter, Organization, PageResponse } from '../../utils/api';
+import { Organization, PageResponse } from "@/types"
+import { getOrganizationsByNumberFilter } from '@/utils/api';
 
 //1. Получить перечень и общее число организаций, которым выделены номера либо с указанной серией, либо за указанный период.
 const OrganizationNumberFilter = () => {
@@ -21,7 +22,7 @@ const OrganizationNumberFilter = () => {
       if (endDate !== '') params.endDate = endDate;
 
       const response = await getOrganizationsByNumberFilter(params);
-      const pageData = response.data as PageResponse<Organization>;
+      const pageData = response as PageResponse<Organization>;
       setFilteredOrgs(pageData.content);
       setTotalCount(pageData.totalElements);
     } catch (err) {

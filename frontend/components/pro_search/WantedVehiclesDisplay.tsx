@@ -1,15 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { WantedVehicle, WantedVehicleStats, getWantedVehicles, getWantedVehicleStats } from '../../utils/api';
-
-interface PageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
+import { getWantedVehicles, getWantedVehicleStats } from '../../utils/api/wanted';
+import { WantedVehicle, WantedVehicleStats, WantedReason, WantedStatus } from '../../types/wanted';
+import { PageResponse } from '../../types/common';
 
 //8. Получить список машин, отданных в розыск, будь то скрывшиеся с места ДТП или угнанные.
 //9. Получить данные об эффективности розыскной работы: количество найденных машин в процентном отношении.
@@ -22,7 +16,7 @@ const WantedVehiclesDisplay = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [selectedReason, setSelectedReason] = useState<'HIT_AND_RUN' | 'THEFT' | ''>('');
+  const [selectedReason, setSelectedReason] = useState<WantedReason | ''>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -36,10 +30,9 @@ const WantedVehiclesDisplay = () => {
           getWantedVehicleStats()
         ]);
 
-        const pageData = vehiclesResponse.data as PageResponse<WantedVehicle>;
-        setVehicles(pageData.content);
-        setTotalPages(pageData.totalPages);
-        setStats(statsResponse.data);
+        setVehicles(vehiclesResponse.content);
+        setTotalPages(vehiclesResponse.totalPages);
+        setStats(statsResponse);
       } catch (err) {
         console.error(err);
         setError('Ошибка при загрузке данных');
@@ -72,14 +65,14 @@ const WantedVehiclesDisplay = () => {
             <select
               value={selectedReason}
               onChange={(e) => {
-                setSelectedReason(e.target.value as 'HIT_AND_RUN' | 'THEFT' | '');
+                setSelectedReason(e.target.value as WantedReason | '');
                 setPage(0);
               }}
               className="w-full p-2 border rounded"
             >
               <option value="">Все причины</option>
-              <option value="THEFT">Угон</option>
-              <option value="HIT_AND_RUN">Скрылся с места ДТП</option>
+              <option value={WantedReason.THEFT}>Угон</option>
+              <option value={WantedReason.HIT_AND_RUN}>Скрылся с места ДТП</option>
             </select>
           </div>
           <div>
@@ -160,13 +153,13 @@ const WantedVehiclesDisplay = () => {
                 <td className="px-4 py-2">{vehicle.vehicle.brand.name}</td>
                 <td className="px-4 py-2">{vehicle.vehicle.color}</td>
                 <td className="px-4 py-2">
-                  {vehicle.reason === 'HIT_AND_RUN' ? 'Скрылся с места ДТП' : 'Угон'}
+                  {vehicle.reason === WantedReason.HIT_AND_RUN ? 'Скрылся с места ДТП' : 'Угон'}
                 </td>
                 <td className="px-4 py-2">
                   {new Date(vehicle.addedDate).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-2">
-                  {vehicle.status === 'WANTED' ? 'В розыске' : 'Найден'}
+                  {vehicle.status === WantedStatus.WANTED ? 'В розыске' : 'Найден'}
                 </td>
               </tr>
             ))}

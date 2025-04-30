@@ -1,40 +1,47 @@
-'use client';
+import dynamic from 'next/dynamic';
+import React from 'react';
+import { PermissionGate } from '../../components/common/PermissionGate';
 
-import BackButton from '../../components/common/BackButton';
-import SqlQueryExecutor from '../../components/admin/SqlQueryExecutor';
+// Dynamically import components with SSR disabled to avoid hydration issues
+const SqlQueryExecutor = dynamic(
+  () => import('../../components/admin/SqlQueryExecutor'),
+  { ssr: false }
+);
+
+const RoleManagement = dynamic(
+  () => import('../../components/admin/RoleManagement').then(mod => ({ default: mod.RoleManagement })),
+  { ssr: false }
+);
 
 export default function AdminPage() {
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <BackButton className="mb-0" />
-          <h1 className="text-3xl font-bold">Панель администратора</h1>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <p className="text-gray-600 mb-4">
-          Здесь вы можете выполнять прямые SQL-запросы к базе данных. 
-          Пожалуйста, будьте осторожны при выполнении запросов, изменяющих данные.
-        </p>
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                Внимание: Выполняйте запросы с осторожностью. Неправильные запросы могут повредить данные.
-              </p>
-            </div>
+      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      
+      <div className="space-y-8">
+        {/* SQL Query Executor - protected by sql_execute permission */}
+        <PermissionGate 
+          resource="sql" 
+          action="execute"
+          fallback={<div>You don't have permission to execute SQL queries.</div>}
+        >
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-2xl font-semibold mb-4">SQL Query Executor</h2>
+            <SqlQueryExecutor />
           </div>
-        </div>
-      </div>
+        </PermissionGate>
 
-      <SqlQueryExecutor />
+        {/* Role Management - protected by role_manage permission */}
+        <PermissionGate 
+          resource="roles" 
+          action="manage"
+          fallback={<div>You don't have permission to manage roles.</div>}
+        >
+          <div className="bg-white shadow rounded-lg p-6">
+            <RoleManagement />
+          </div>
+        </PermissionGate>
+      </div>
     </div>
   );
 }

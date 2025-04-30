@@ -3,7 +3,7 @@
 
 import React from "react";
 import { useForm } from "react-hook-form";
-import { addOwner } from '../../utils/api';
+import { addOwner } from '@/utils/api';
 
 interface OwnerFormData {
   fullName: string;

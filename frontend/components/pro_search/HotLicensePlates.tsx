@@ -1,20 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getHotLicensePlates } from '../../utils/api';
+import { getHotLicensePlates } from '../../utils/api/license-plates';
+import { LicensePlate } from '../../types/license-plates';
 
 export default function HotLicensePlates() {
-  const [hotPlates, setHotPlates] = useState<Array<{ licenseNumber: string; status: boolean }>>([]);
+  const [hotPlates, setHotPlates] = useState<LicensePlate[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   async function fetchHotPlates() {
     try {
-      const response = await getHotLicensePlates();
-      if (response.status !== 200) {
-        setError("Ошибка при загрузке горячих номеров");
-        return;
-      }
-      setHotPlates(response.data);
+      const plates = await getHotLicensePlates();
+      setHotPlates(plates);
     } catch (e) {
       setError("Ошибка сети при загрузке горячих номеров");
     }

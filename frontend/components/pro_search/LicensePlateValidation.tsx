@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { validateLicensePlate, getHotLicensePlates } from '../../utils/api';
+import { validateLicensePlate, getHotLicensePlates } from '@/utils/api';
+import { LicensePlate } from '../../types/license-plates';
 
 export default function LicensePlateValidation() {
   const [licenseNumber, setLicenseNumber] = useState("");
   const [validationResult, setValidationResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [hotPlates, setHotPlates] = useState<Array<{ licenseNumber: string; status: boolean }>>([]);
+  const [hotPlates, setHotPlates] = useState<LicensePlate[]>([]);
 
   async function validateLicensePlateHandler() {
     setError(null);
@@ -17,12 +18,7 @@ export default function LicensePlateValidation() {
       return;
     }
     try {
-      const response = await validateLicensePlate(licenseNumber);
-      if (response.status !== 200) {
-        setError("Ошибка при проверке номера");
-        return;
-      }
-      const isValid = response.data;
+      const isValid = await validateLicensePlate(licenseNumber);
       setValidationResult(isValid ? "Номер корректен" : "Номер некорректен");
     } catch (e) {
       setError("Ошибка сети при проверке номера");

@@ -1,135 +1,168 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { addToWanted, getVehicleByLicensePlate } from '../../utils/api';
+import React from "react";
+import { useForm, useWatch } from "react-hook-form";
+import SuggestionInput from "../input/SuggestionInput"; // Импортируем компонент
+import { addWanted, getOwners, getVehicles } from "../../utils/api";
 
-interface AddWantedVehicleFormData {
-  licensePlate: string;
-  reason: 'HIT_AND_RUN' | 'THEFT';
-  description: string;
+interface WantedFormData {
+  vehicleId: number | null;
+  addedDate: string;
+  reason: string;
+  status: "WANTED" | "FOUND";
+  ownerName: string;
+  ownerId: number | null;
 }
 
-const AddWantedVehicleForm = ({ onSuccess }: { onSuccess: () => void }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+const AddWantedForm = () => {
   const {
     register,
     handleSubmit,
+    setValue,
+    control,
     reset,
-    formState: { errors }
-  } = useForm<AddWantedVehicleFormData>({
+    formState: { errors },
+  } = useForm<WantedFormData>({
     defaultValues: {
-      licensePlate: '',
-      reason: 'HIT_AND_RUN',
-      description: ''
-    }
+      vehicleId: null,
+      addedDate: "",
+      reason: "",
+      status: "WANTED",
+      ownerName: "",
+      ownerId: null,
+    },
   });
 
-  const onSubmit = async (data: AddWantedVehicleFormData) => {
+  const [vehicles, setVehicles] = React.useState<any[]>([]);
+  const ownerId = useWatch({ control, name: "ownerId" });
+
+  // Обновление списка транспортных средств при изменении владельца
+  React.useEffect(() => {
+    if (ownerId) {
+      getVehicles({ ownerId })
+        .then((response) => {
+          const vehiclesData = response.content;
+          setVehicles(vehiclesData);
+        })
+        .catch((error) => {
+          console.error("Error fetching vehicles for owner", error);
+          setVehicles([]);
+        });
+    } else {
+      setVehicles([]);
+      setValue("vehicleId", null);
+    }
+  }, [ownerId, setValue]);
+
+  // Обработчик выбора подсказки
+  const onSuggestionSelect = (suggestion: { id: number; name: string }) => {
+    setValue("ownerName", suggestion.name);
+    setValue("ownerId", suggestion.id);
+    setValue("vehicleId", null);
+  };
+
+  // Обработчик отправки формы
+  const onSubmit = async (data: WantedFormData) => {
     try {
-      setIsSubmitting(true);
-      setError(null);
-
-      // Проверяем существование транспортного средства
-      const vehicleResponse = await getVehicleByLicensePlate(data.licensePlate);
-      const vehicle = vehicleResponse.data;
-
-      if (!vehicle) {
-        setError('Транспортное средство с указанным номером не найдено');
-        return;
-      }
-
-      // Добавляем в розыск
-      await addToWanted({
-        vehicle: {
-          licensePlate: {
-            licenseNumber: data.licensePlate
-          },
-          brand: vehicle.brand,
-          color: vehicle.color
-        },
-        addedDate: new Date().toISOString(),
+      await addWanted({
+        vehicleId: data.vehicleId || 0,
+        addedDate: data.addedDate + "T00:00:00",
         reason: data.reason,
-        status: 'WANTED',
-        description: data.description
+        status: data.status,
       });
-
-      reset();
-      onSuccess();
-      alert('Транспортное средство успешно добавлено в розыск');
-    } catch (err) {
-      console.error(err);
-      setError('Ошибка при добавлении в розыск');
-    } finally {
-      setIsSubmitting(false);
+      reset({
+        vehicleId: null,
+        addedDate: "",
+        reason: "",
+        status: "WANTED",
+        ownerName: "",
+        ownerId: null,
+      });
+      setVehicles([]);
+      alert("Транспортное средство успешно добавлено в розыск!");
+    } catch (error) {
+      alert("Ошибка при добавлении транспортного средства в розыск.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white rounded-lg shadow p-6">
-      <h3 className="text-xl font-semibold mb-4">Добавить в розыск</h3>
+    <form onSubmit={handleSubmit(onSubmit)} className="p-4 max-w-3xl mx-auto space-y-4">
+      {/* Владелец */}
+      <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700">
+        Владелец
+      </label>
+      <SuggestionInput
+        placeholder="Поиск владельца"
+        value={(useWatch({ control, name: "ownerName" }) ?? "") as string}
+        onChange={(value) => setValue("ownerName", value)}
+        onSelect={onSuggestionSelect}
+        fetchData={(search) => getOwners({ search })}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block mb-1 font-medium">Номерной знак</label>
-          <input
-            type="text"
-            {...register('licensePlate', { required: 'Обязательное поле' })}
-            className="w-full p-2 border rounded"
-            placeholder="А123БВ777"
-          />
-          {errors.licensePlate && (
-            <p className="text-red-500 text-sm mt-1">{errors.licensePlate.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Причина розыска</label>
+      {/* Транспортное средство */}
+      {ownerId !== null && (
+        <>
+          <label htmlFor="vehicleId" className="block text-sm font-medium text-gray-700">
+            Транспортное средство
+          </label>
           <select
-            {...register('reason', { required: 'Обязательное поле' })}
-            className="w-full p-2 border rounded"
+            {...register("vehicleId", { valueAsNumber: true, required: "Это поле обязательно" })}
+            className={`border p-2 w-full`}
+            disabled={!ownerId}
           >
-            <option value="HIT_AND_RUN">Скрылся с места ДТП</option>
-            <option value="THEFT">Угон</option>
+            <option value="">Выберите транспортное средство</option>
+            {vehicles.map((vehicle) => (
+              <option key={vehicle.id} value={vehicle.id}>
+                {`${vehicle.brand?.name ?? "Unknown Brand"} (${
+                  vehicle.licensePlate?.licenseNumber ?? "Unknown License Plate"
+                })`}
+              </option>
+            ))}
           </select>
-          {errors.reason && (
-            <p className="text-red-500 text-sm mt-1">{errors.reason.message}</p>
-          )}
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="block mb-1 font-medium">Описание</label>
-          <textarea
-            {...register('description', { required: 'Обязательное поле' })}
-            rows={3}
-            className="w-full p-2 border rounded"
-            placeholder="Укажите дополнительные детали..."
-          />
-          {errors.description && (
-            <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
-          )}
-        </div>
-      </div>
-
-      {error && (
-        <div className="text-red-500 text-center p-2 bg-red-50 rounded">
-          {error}
-        </div>
+        </>
       )}
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          {isSubmitting ? 'Добавление...' : 'Добавить в розыск'}
-        </button>
-      </div>
+      {/* Дата добавления */}
+      <label htmlFor="addedDate" className="block text-sm font-medium text-gray-700">
+        Дата добавления
+      </label>
+      <input
+        type="date"
+        {...register("addedDate", { required: "Это поле обязательно" })}
+        className={`border p-2 w-full `}
+      />
+
+      {/* Причина */}
+      <label htmlFor="reason" className="block text-sm font-medium text-gray-700">
+        Причина
+      </label>
+      <input
+        type="text"
+        {...register("reason", { required: "Это поле обязательно" })}
+        className={`border p-2 w-full`}
+      />
+
+      {/* Статус */}
+      <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+        Статус
+      </label>
+      <select
+        {...register("status", { required: "Это поле обязательно" })}
+        className={`border p-2 w-full`}
+      >
+        <option value="WANTED">Розыскивается</option>
+        <option value="FOUND">Найден</option>
+      </select>
+
+      {/* Кнопка отправки */}
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+      >
+        Добавить в розыск
+      </button>
     </form>
   );
 };
 
-export default AddWantedVehicleForm;
+export default AddWantedForm;

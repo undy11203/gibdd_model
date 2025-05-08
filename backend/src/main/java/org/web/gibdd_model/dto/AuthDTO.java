@@ -24,7 +24,6 @@ public class AuthDTO {
         private String username;
         private String password;
         private String fullName;
-        private String email;
     }
 
     @Data

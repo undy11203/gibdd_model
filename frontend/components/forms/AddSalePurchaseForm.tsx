@@ -35,7 +35,7 @@ const AddSalePurchaseForm = () => {
     if (sellerId) {
       getVehicles({ ownerId: sellerId })
         .then((response) => {
-          const vehiclesData = response.data.content || response.data;
+          const vehiclesData = response.content;
           setVehicles(vehiclesData);
         })
         .catch((error) => {

@@ -171,4 +171,11 @@ public class RoleManagementService {
             .description(permission.getDescription())
             .build();
     }
+
+    public void deleteRole(Long roleId) {
+
+    }
+
+    public void deletePermission(Long permissionId) {
+    }
 }

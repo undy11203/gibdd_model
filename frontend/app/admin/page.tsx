@@ -1,6 +1,9 @@
+"use client";
+
 import dynamic from 'next/dynamic';
 import React from 'react';
 import { PermissionGate } from '../../components/common/PermissionGate';
+import BackButton from '@/components/common/BackButton';
 
 // Dynamically import components with SSR disabled to avoid hydration issues
 const SqlQueryExecutor = dynamic(
@@ -16,6 +19,7 @@ const RoleManagement = dynamic(
 export default function AdminPage() {
   return (
     <div className="container mx-auto p-4">
+      <BackButton className="mb-0" />
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
       
       <div className="space-y-8">

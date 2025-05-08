@@ -9,6 +9,8 @@ export * from './wanted';
 export * from './inspections';
 export * from './admin';
 export * from './license-plates';
+export * from './alarm-systems';
+export * from './sales-purchases';
 
 // Export the API client for direct use if needed
 export { default as apiClient } from './client';

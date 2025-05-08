@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AddTechnicalInspectionForm from '../../components/forms/AddTechnicalInspectionForm';
-import { getInspections, TechnicalInspection } from '@/utils/api';
+import { TechnicalInspection } from "@/types"
+import { getInspections } from '@/utils/api';
 
 export default function InspectionPage() {
   const [inspections, setInspections] = useState<TechnicalInspection[]>([]);

@@ -15,11 +15,6 @@ export default function WantedPage() {
   const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const handleAddSuccess = () => {
-    setActiveTab('list');
-    setRefreshTrigger(prev => prev + 1);
-  };
-
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -58,7 +53,7 @@ export default function WantedPage() {
               Убедитесь, что указанный номерной знак зарегистрирован в системе.
             </p>
           </div>
-          <AddWantedVehicleForm onSuccess={handleAddSuccess} />
+          <AddWantedVehicleForm />
         </>
       )}
     </div>

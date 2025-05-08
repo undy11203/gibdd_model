@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AddVehicleForm from '@/components/forms/AddVehicleForm';
 import { getVehicles } from '@/utils/api';
-import { Vehicle } from '@/types/type';
+import { Vehicle } from '@/types';
 
 
 
@@ -17,7 +17,7 @@ export default function Vehicles() {
 const fetchVehicles = async () => {
   try {
 const response = await getVehicles({});
-setVehicles(response.data.content);
+setVehicles(response.content);
   } catch (error) {
     console.error(error);
   }

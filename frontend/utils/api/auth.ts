@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import api from './client';
 import {
   LoginRequest,
@@ -16,12 +17,29 @@ export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   return response.data;
 };
 
+export const logout = async (): Promise<void> => {
+  try {
+    await api.post('/auth/logout');
+  } catch (error) {
+    // Even if the logout request fails, we want to clear local state
+    console.error('Error during logout:', error);
+  }
+};
+
 export const checkAuth = async (): Promise<boolean> => {
   try {
-    await api.get('/auth/check');
+    // Try to get current user permissions as a way to verify auth
+    await api.get<Permission[]>('/admin/roles/current-user/permissions');
     return true;
-  } catch {
-    return false;
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        return false;
+      }
+    }
+    // For other errors (like network issues), assume token is valid
+    // to prevent unnecessary logouts
+    return true;
   }
 };
 

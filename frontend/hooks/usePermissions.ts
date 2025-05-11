@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Permission } from "@/types"
-import { getCurrentUserPermissions } from '../utils/api';
-import { AxiosResponse } from 'axios';
+import { Permission } from '../types/auth';
+import { getCurrentUserPermissions } from '../utils/api/auth';
 
 interface UsePermissionsReturn {
   permissions: Permission[];
@@ -20,8 +19,7 @@ export const usePermissions = (): UsePermissionsReturn => {
   useEffect(() => {
     const fetchPermissions = async () => {
       try {
-        const response: AxiosResponse<Permission[]> = await getCurrentUserPermissions();
-        const userPermissions = response.data;
+        const userPermissions = await getCurrentUserPermissions();
         setPermissions(userPermissions);
         // Check if any of the user's roles is a superadmin role
         setIsSuperAdmin(userPermissions.some((p: Permission) => p.name === 'ROLE_SUPERADMIN'));

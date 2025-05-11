@@ -10,6 +10,7 @@ import org.web.gibdd_model.model.User;
 import org.web.gibdd_model.repository.UserRepository;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,16 +24,20 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-                .flatMap(role -> {
-                    if (role.isSuperAdmin()) {
-                        return List.of(new SimpleGrantedAuthority("ROLE_SUPERADMIN")).stream();
-                    }
-                    return role.getPermissions().stream()
-                            .map(permission -> new SimpleGrantedAuthority(
-                                    permission.getResource() + "_" + permission.getAction()));
-                })
-                .collect(Collectors.toList());
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        
+        user.getRoles().forEach(role -> {
+            // Add the role itself
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+            
+            // Add all permissions for non-superadmin roles
+            if (!role.isSuperAdmin()) {
+                authorities.addAll(role.getPermissions().stream()
+                    .map(permission -> new SimpleGrantedAuthority(
+                        permission.getResource() + "_" + permission.getAction()))
+                    .collect(Collectors.toList()));
+            }
+        });
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

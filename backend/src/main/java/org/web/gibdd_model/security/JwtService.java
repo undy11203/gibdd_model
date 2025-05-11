@@ -41,7 +41,7 @@ public class JwtService {
         
         // Add roles
         user.getRoles().forEach(role -> {
-            authorities.add("ROLE_" + role.getName());
+            authorities.add(role.getName());
             // Add permissions from each role
             role.getPermissions().forEach(permission -> 
                 authorities.add(permission.getResource() + "_" + permission.getAction())

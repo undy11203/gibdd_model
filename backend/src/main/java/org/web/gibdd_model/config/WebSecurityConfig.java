@@ -30,7 +30,9 @@ public class WebSecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("SUPERADMIN")
+                .requestMatchers("/api/admin/roles/current-user/permissions").authenticated()
+                .requestMatchers("/api/admin/roles/check-permission").authenticated()
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_SUPERADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

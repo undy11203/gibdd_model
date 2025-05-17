@@ -3,25 +3,36 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AddTechnicalInspectionForm from '../../components/forms/AddTechnicalInspectionForm';
-import { TechnicalInspection } from "@/types"
-import { getInspections } from '@/utils/api';
+import TabNav from '../../components/common/TabNav';
+// import { TechnicalInspection } from "'types"' (see below for file content)
+// import { getInspections } from ''utils/api'' (see below for file content);
 
 export default function InspectionPage() {
-  const [inspections, setInspections] = useState<TechnicalInspection[]>([]);
+  const [inspections, setInspections] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('list');
 
   const router = useRouter();
 
   useEffect(() => {
     const fetchInspections = async () => {
       try {
-        const response = await getInspections({});
-        setInspections(response.content);
+        // const response = await getInspections({});
+        // setInspections(response.content);
       } catch (error) {
         console.error(error);
       }
     };
     fetchInspections();
   }, []);
+
+  const tabs = [
+    { id: 'list', label: 'List' },
+    { id: 'add', label: 'Add' },
+  ];
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+  };
 
   return (
     <div className="p-4">
@@ -42,21 +53,27 @@ export default function InspectionPage() {
           />
         </svg>
       </button>
-      <h1 className="text-2xl font-bold mb-4">Technical Inspection Registration</h1>
 
-      <h2 className="text-xl font-semibold mb-2">List of Technical Inspections</h2>
-      <ul className="space-y-2 mb-6">
-        {inspections != undefined && inspections.map((inspection) => (
-          <li key={inspection.id} className="border p-2">
-            <strong>{inspection.vehicle?.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {inspection.vehicle?.brand?.name ?? 'Unknown Brand'}, {inspection.inspectionDate}, {inspection.result}
-          </li>
-        ))}
-      </ul>
+      <TabNav tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} />
 
-      <h2 className="text-xl font-semibold mb-2">Register Technical Inspection</h2>
-      <div>
-        <AddTechnicalInspectionForm />
-      </div>
+      {activeTab === 'list' && (
+        <>
+          <h2 className="text-xl font-semibold mb-2">List of Technical Inspections</h2>
+          <ul className="space-y-2 mb-6">
+            {inspections != undefined && inspections.map((inspection) => (
+              <li key={inspection.id} className="border p-2">
+                <strong>{inspection.vehicle?.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {inspection.vehicle?.brand?.name ?? 'Unknown Brand'}, {inspection.inspectionDate}, {inspection.result}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {activeTab === 'add' && (
+        <div>
+          <AddTechnicalInspectionForm />
+        </div>
+      )}
     </div>
   );
 }

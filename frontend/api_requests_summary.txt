@@ -1,0 +1,38 @@
+API Requests Used in the Project:
+
+1. Accidents API (frontend/utils/api/accidents.ts)
+- getAccidents: GET /accidents
+- addAccident: POST /accidents
+- getAccidentStatistics: GET /accidents/statistics
+- getAccidentAnalysis: GET /accidents/analysis
+- getDrunkDrivingStats: GET /accidents/drunk-driving-stats
+- addAccidentParticipant: POST /accidents/{accidentId}/participants
+
+2. Auth API (frontend/utils/api/auth.ts)
+- register: POST /auth/register
+- login: POST /auth/login
+- logout: POST /auth/logout
+- checkAuth: GET /admin/roles/current-user/permissions
+- getCurrentUserPermissions: GET /admin/roles/current-user/permissions
+- checkPermission: GET /admin/roles/check-permission
+
+3. Vehicles API (frontend/utils/api/vehicles.ts)
+- getVehicles: GET /vehicles
+- addVehicle: POST /vehicles
+- getVehicleByLicensePlate: GET /vehicles/by-license-plate/{licensePlate}
+- getVehicleDossierByLicensePlate: GET /vehicles/dossier-by-license?licenseNumber=
+- getBrands: GET /brands
+
+4. Owners API (frontend/utils/api/owners.ts)
+- getOwners: GET /owners
+- addOwner: POST /owners
+- getOwnerByLicenseNumber: GET /owner-by-license?licenseNumber=
+- getOwnerById: GET /owners/{id}
+- updateOwner: PUT /owners/{id}
+- deleteOwner: DELETE /owners/{id}
+
+5. Sales-Purchases API (frontend/utils/api/sales-purchases.ts)
+- addSalePurchase: POST /sales-purchases
+- getSalePurchases: GET /sales-purchases
+
+This summary includes the main API requests used in the frontend project as per the api function files.

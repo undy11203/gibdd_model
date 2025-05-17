@@ -1,31 +1,31 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import AddVehicleForm from '@/components/forms/AddVehicleForm';
-import { getVehicles } from '@/utils/api';
-import { Vehicle } from '@/types';
-
-
+import TabNav from '../../components/common/TabNav';
+import AddVehicleForm from '../../components/forms/AddVehicleForm';
+import { getVehicles } from '../../utils/api/vehicles';
+import { Vehicle } from '../../types/vehicles';
 
 export default function Vehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'list' | 'register'>('list');
 
   useEffect(() => {
-const fetchVehicles = async () => {
-  try {
-const response = await getVehicles({});
-setVehicles(response.content);
-  } catch (error) {
-    console.error(error);
-  }
-};
+    const fetchVehicles = async () => {
+      try {
+        const response = await getVehicles({});
+        setVehicles(response.content);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     fetchVehicles();
   }, []);
 
-
+  const tabs = [
+    { id: 'list', label: 'Список' },
+    { id: 'register', label: 'Регистрация' }
+  ];
 
   return (
     <div className="p-4">
@@ -48,17 +48,31 @@ setVehicles(response.content);
       </button>
       <h1 className="text-2xl font-bold mb-4">Транспортные средства</h1>
 
-      <h2 className="text-xl font-semibold mb-2">Список транспортных средств</h2>
-      <ul className="space-y-2 mb-6">
-        {vehicles != undefined && vehicles.map((vehicle) => (
-          <li key={vehicle.id} className="border p-2">
-<strong>{vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {vehicle.brand?.name ?? 'Unknown Brand'}, {vehicle.releaseDate}, {vehicle.owner?.fullName ?? 'Unknown Owner'}
-          </li>
-        ))}
-      </ul>
+      <TabNav 
+        tabs={tabs} 
+        activeTab={activeTab} 
+        onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
+      />
 
-      <h2 className="text-xl font-semibold mb-2">Регистрация транспортного средства</h2>
-      <AddVehicleForm />
+      {activeTab === 'list' && (
+        <>
+          <h2 className="text-xl font-semibold mb-2">Список транспортных средств</h2>
+          <ul className="space-y-2 mb-6">
+            {vehicles != undefined && vehicles.map((vehicle) => (
+              <li key={vehicle.id} className="border p-2">
+                <strong>{vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {vehicle.brand?.name ?? 'Unknown Brand'}, {vehicle.releaseDate}, {vehicle.owner?.fullName ?? 'Unknown Owner'}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {activeTab === 'register' && (
+        <>
+          <h2 className="text-xl font-semibold mb-2">Регистрация транспортного средства</h2>
+          <AddVehicleForm />
+        </>
+      )}
     </div>
   );
 }

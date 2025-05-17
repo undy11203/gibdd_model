@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { AccidentData, AccidentType, AccidentRole } from '@/types';
 import { addAccident, getVehicleByLicensePlate } from '../../utils/api';
+import YandexLocationPicker from '../../components/YandexLocationPicker';
 
 interface ParticipantData {
   licensePlate: string;
@@ -40,12 +41,15 @@ const accidentRoleLabels: Record<AccidentRole, string> = {
 const AddAccidentForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   const {
     register,
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors }
   } = useForm<AccidentFormData>({
     defaultValues: {
@@ -100,6 +104,8 @@ const AddAccidentForm = () => {
       await addAccident(preparedData);
       alert('ДТП успешно зарегистрировано!');
       reset();
+      setLatitude(null);
+      setLongitude(null);
     } catch (error) {
       console.error(error);
       setError('Ошибка при регистрации ДТП');
@@ -140,30 +146,24 @@ const AddAccidentForm = () => {
           )}
         </div>
 
-        <div>
-          <label className="block mb-1 font-medium">Широта</label>
-          <input
-            type="number"
-            step="any"
-            {...register('latitude', { required: 'Обязательное поле' })}
-            className="w-full p-2 border rounded"
+        <div className="md:col-span-2">
+          <label className="block mb-1 font-medium">Местоположение ДТП</label>
+          <YandexLocationPicker
+            apiKey="cd63fdfd-c1f8-41f8-b1a5-c3f9556352de" // Пример API ключа, в реальном приложении следует использовать переменные окружения
+            latitude={latitude}
+            longitude={longitude}
+            onLocationChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+              setValue('latitude', lat.toString());
+              setValue('longitude', lng.toString());
+            }}
           />
-          {errors.latitude && (
-            <p className="text-red-500 text-sm mt-1">{errors.latitude.message}</p>
+          {(errors.latitude || errors.longitude) && (
+            <p className="text-red-500 text-sm mt-1">Необходимо указать местоположение</p>
           )}
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Долгота</label>
-          <input
-            type="number"
-            step="any"
-            {...register('longitude', { required: 'Обязательное поле' })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.longitude && (
-            <p className="text-red-500 text-sm mt-1">{errors.longitude.message}</p>
-          )}
+          <input type="hidden" {...register('latitude', { required: 'Обязательное поле' })} />
+          <input type="hidden" {...register('longitude', { required: 'Обязательное поле' })} />
         </div>
 
         <div className="md:col-span-2">

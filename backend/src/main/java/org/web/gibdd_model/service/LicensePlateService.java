@@ -30,12 +30,12 @@ public class LicensePlateService {
         if (!LICENSE_PLATE_PATTERN.matcher(licenseNumber).matches()) {
             return false;
         }
+        if (licenseNumber.length() != 6) {
+            return false;
+        }
         var plateOpt = licensePlateRepository.findById(licenseNumber);
         if (plateOpt.isPresent()) {
             return plateOpt.get().getStatus();
-        }
-        if (licenseNumber.length() != 6) {
-            return false;
         }
         String series = licenseNumber.substring(0, 1) + licenseNumber.substring(4, 6);
         String numberStr = licenseNumber.substring(1, 4);

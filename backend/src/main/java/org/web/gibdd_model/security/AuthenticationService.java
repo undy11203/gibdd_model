@@ -58,12 +58,6 @@ public class AuthenticationService {
     }
 
     public AuthResponse login(LoginRequest request) {
-//        Authentication authentication = authenticationManager.authenticate(
-//            new UsernamePasswordAuthenticationToken(
-//                request.getUsername(),
-//                request.getPassword()
-//            )
-//        );
 
         User user = userRepository.findByUsername(request.getUsername())
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));

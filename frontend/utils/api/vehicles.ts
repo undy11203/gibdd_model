@@ -14,7 +14,7 @@ export const getVehicles = async (params?: VehicleQueryParams): Promise<PageResp
   return response.data;
 };
 
-export const addVehicle = async (data: VehicleData): Promise<Vehicle> => {
+export const addVehicle = async (data: VehicleData): Promise<Vehicle> => {  
   const response = await api.post<Vehicle>('/vehicles', data);
   return response.data;
 };

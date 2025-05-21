@@ -21,10 +21,11 @@ const useSuggestions = (fetchData: (search: string) => Promise<any>) => {
       setLoading(true);
       try {
         const response = await fetchData(search);
-        const data = response.data.content ?? response.data;
+        // The response from getOwners is already the data object, not an axios response
+        const data = response.content || response;
         const formattedSuggestions = data.map((item: any) => ({
           id: item.id,
-          name: item.fullName || "Unknown",
+          name: item.fullName || item.name || "Unknown",
         }));
         setSuggestions(formattedSuggestions);
       } catch (error) {

@@ -18,6 +18,7 @@ public class AdminController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+//
     @PostMapping("/execute-query")
     public ResponseEntity<SqlQueryResponseDTO> executeQuery(@RequestBody SqlQueryRequestDTO request) {
         try {

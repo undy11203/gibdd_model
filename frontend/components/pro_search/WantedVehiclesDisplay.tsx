@@ -25,8 +25,17 @@ const WantedVehiclesDisplay = () => {
       try {
         setLoading(true);
         setError(null);
+        
+        // Prepare date parameters if both dates are provided
+        const dateParams = (startDate && endDate) ? { startDate, endDate } : {};
+        
         const [vehiclesResponse, statsResponse] = await Promise.all([
-          getWantedVehicles({ reason: selectedReason, page, size: 10 }),
+          getWantedVehicles({ 
+            reason: selectedReason, 
+            page, 
+            size: 10,
+            ...dateParams
+          }),
           getWantedVehicleStats()
         ]);
 
@@ -42,7 +51,7 @@ const WantedVehiclesDisplay = () => {
     };
 
     fetchData();
-  }, [page, selectedReason]);
+  }, [page, selectedReason, startDate, endDate]);
 
   if (loading) {
     return <div className="text-center p-4">Загрузка данных...</div>;
@@ -82,7 +91,10 @@ const WantedVehiclesDisplay = () => {
             <input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPage(0); // Reset to first page when changing filters
+              }}
               className="w-full p-2 border rounded"
             />
           </div>
@@ -93,9 +105,24 @@ const WantedVehiclesDisplay = () => {
             <input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setPage(0); // Reset to first page when changing filters
+              }}
               className="w-full p-2 border rounded"
             />
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={() => {
+                setStartDate('');
+                setEndDate('');
+                setPage(0);
+              }}
+              className="p-2 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+            >
+              Сбросить даты
+            </button>
           </div>
         </div>
       </div>
@@ -149,9 +176,9 @@ const WantedVehiclesDisplay = () => {
           <tbody>
             {vehicles.map((vehicle) => (
               <tr key={vehicle.id} className="border-b">
-                <td className="px-4 py-2 text-center">{vehicle.vehicle.licensePlate.licenseNumber}</td>
-                <td className="px-4 py-2">{vehicle.vehicle.brand.name}</td>
-                <td className="px-4 py-2">{vehicle.vehicle.color}</td>
+                <td className="px-4 py-2 text-center">{vehicle.vehicle.licensePlate?.licenseNumber || 'Нет номера'}</td>
+                <td className="px-4 py-2">{vehicle.vehicle.brand?.name || 'Неизвестно'}</td>
+                <td className="px-4 py-2">{vehicle.vehicle.color || 'Неизвестно'}</td>
                 <td className="px-4 py-2">
                   {vehicle.reason === WantedReason.HIT_AND_RUN ? 'Скрылся с места ДТП' : 'Угон'}
                 </td>

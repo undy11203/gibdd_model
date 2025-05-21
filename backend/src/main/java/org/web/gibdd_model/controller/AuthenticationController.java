@@ -15,6 +15,7 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
+//
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         try {
@@ -25,6 +26,7 @@ public class AuthenticationController {
         }
     }
 
+//
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         try {
@@ -35,6 +37,7 @@ public class AuthenticationController {
         }
     }
 
+//
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         // Since we're using JWT, we don't need to do anything server-side

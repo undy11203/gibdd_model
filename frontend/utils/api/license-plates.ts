@@ -17,9 +17,14 @@ export const getLicensePlates = async (params?: LicensePlateQueryParams): Promis
   return response.data;
 };
 
-export const validateLicensePlate = async (licenseNumber: string): Promise<LicensePlateValidationResponse> => {
-  const response = await api.get<LicensePlateValidationResponse>(`/license-plates/validate/${licenseNumber}`);
-  return response.data;
+export const validateLicensePlate = async (licenseNumber: string): Promise<boolean> => {
+  try {
+    const response = await api.get<LicensePlateValidationResponse>(`/license-plates/validate/${licenseNumber}`);
+    return response.data.isValid;
+  } catch (error) {
+    console.error("Error validating license plate:", error);
+    return false;
+  }
 };
 
 export const getHotLicensePlates = async (): Promise<LicensePlate[]> => {

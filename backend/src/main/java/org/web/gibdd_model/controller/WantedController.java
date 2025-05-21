@@ -7,8 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.web.gibdd_model.dto.WantedVehicleDTO;
 import org.web.gibdd_model.dto.WantedVehicleStatsDTO;
+import org.web.gibdd_model.model.Vehicle;
 import org.web.gibdd_model.model.WantedVehicle;
+import org.web.gibdd_model.repository.VehicleRepository;
 import org.web.gibdd_model.service.WantedService;
 
 import java.time.LocalDate;
@@ -20,32 +23,42 @@ public class WantedController {
 
     @Autowired
     private WantedService wantedService;
+    
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
+//
     @GetMapping
     public Page<WantedVehicle> getAllWantedVehicles(
             @RequestParam(required = false) String reason,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return wantedService.getAllWantedVehicles(reason, pageable);
+        return wantedService.getAllWantedVehicles(reason, startDate, endDate, pageable);
     }
 
+//
     @GetMapping("/hit-and-run")
     public List<WantedVehicle> getHitAndRunVehicles() {
         return wantedService.getHitAndRunVehicles();
     }
 
+//
     @GetMapping("/stolen")
     public List<WantedVehicle> getStolenVehicles() {
         return wantedService.getStolenVehicles();
     }
 
+//
     @GetMapping("/stats")
     public ResponseEntity<WantedVehicleStatsDTO> getWantedVehicleStats() {
         WantedVehicleStatsDTO stats = wantedService.getWantedVehicleStats();
         return ResponseEntity.ok(stats);
     }
 
+//
     @GetMapping("/found")
     public List<WantedVehicle> getFoundVehicles(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -53,12 +66,28 @@ public class WantedController {
         return wantedService.getFoundVehiclesBetweenDates(startDate, endDate);
     }
 
-    @PostMapping
-    public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicle wantedVehicle) {
-        WantedVehicle saved = wantedService.addToWanted(wantedVehicle);
-        return ResponseEntity.ok(saved);
-    }
+//
+@PostMapping
+public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicleDTO wantedVehicleDTO) {
+    // Convert DTO to entity
+    WantedVehicle wantedVehicle = new WantedVehicle();
+    
+    // Find the vehicle by ID
+    Vehicle vehicle = vehicleRepository.findById(wantedVehicleDTO.getVehicleId())
+            .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + wantedVehicleDTO.getVehicleId()));
+    
+    // Set the properties from DTO to entity
+    wantedVehicle.setVehicle(vehicle);
+    wantedVehicle.setAddedDate(wantedVehicleDTO.getAddedDate());
+    wantedVehicle.setReason(wantedVehicleDTO.getReason());
+    wantedVehicle.setStatus(wantedVehicleDTO.getStatus());
+    
+    // Save the entity
+    WantedVehicle saved = wantedService.addToWanted(wantedVehicle);
+    return ResponseEntity.ok(saved);
+}
 
+//
     @PutMapping("/{id}/found")
     public ResponseEntity<WantedVehicle> markAsFound(
             @PathVariable Long id,

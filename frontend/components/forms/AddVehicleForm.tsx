@@ -9,7 +9,7 @@ import {
   getOrganizations,
   getBrands,
   getAlarmSystems,
-  getLicensePlates,
+  validateLicensePlate,
 } from "@/utils/api";
 import SuggestionInput from "../input/SuggestionInput"; // Импортируем компонент
 
@@ -18,6 +18,7 @@ interface VehicleFormData {
   alarmSystemId: number | null;
   ownerId: number | null;
   organizationId: number | null;
+  licenseNumber: string;
   licensePlateId: number | null;
   releaseDate: string;
   engineVolume: number | null;
@@ -34,6 +35,7 @@ const prepareFormData = (formData: VehicleFormData) => ({
   ownerId: formData.ownerId || 0,
   organizationId: formData.organizationId || 0,
   licensePlateId: formData.licensePlateId || 0,
+  licenseNumber: formData.licenseNumber,
   releaseDate: formData.releaseDate + "T00:00:00",
   engineVolume: formData.engineVolume || 0,
   engineNumber: formData.engineNumber,
@@ -50,12 +52,14 @@ const AddVehicleForm = () => {
     setValue,
     control,
     reset,
+    formState: { errors },
   } = useForm<VehicleFormData>({
     defaultValues: {
       brandId: null,
       alarmSystemId: null,
       ownerId: null,
       organizationId: null,
+      licenseNumber: "",
       licensePlateId: null,
       releaseDate: "",
       engineVolume: null,
@@ -67,17 +71,22 @@ const AddVehicleForm = () => {
     },
   });
 
+  const [licensePlateValidation, setLicensePlateValidation] = useState<{
+    isValid: boolean | null;
+  }>({
+    isValid: null,
+  });
+
   const [displayValues, setDisplayValues] = useState({
     brandName: "",
     alarmSystemName: "",
     ownerName: "",
     organizationName: "",
-    licensePlateName: "",
   });
 
   const onSuggestionSelect = (
     suggestion: { id: number; name: string },
-    field: "brand" | "alarmSystem" | "owner" | "organization" | "licensePlate"
+    field: "brand" | "alarmSystem" | "owner" | "organization"
   ) => {
     switch (field) {
       case "brand":
@@ -96,12 +105,44 @@ const AddVehicleForm = () => {
         setValue("organizationId", suggestion.id);
         setDisplayValues((prev) => ({ ...prev, organizationName: suggestion.name }));
         break;
-      case "licensePlate":
-        setValue("licensePlateId", suggestion.id);
-        setDisplayValues((prev) => ({ ...prev, licensePlateName: suggestion.name }));
-        break;
       default:
         break;
+    }
+  };
+
+  const validateLicensePlateNumber = async (licenseNumber: string) => {
+    if (!licenseNumber) {
+      setLicensePlateValidation({
+        isValid: null
+      });
+      setValue("licensePlateId", null);
+      return;
+    }
+
+    try {
+      // Проверяем, что номер соответствует формату и доступен
+      const response = await validateLicensePlate(licenseNumber);
+      
+      if (response) {
+        // Если номер валиден, устанавливаем его как доступный
+        setLicensePlateValidation({
+          isValid: true,
+        });
+        // Используем сам номерной знак как идентификатор
+        setValue("licenseNumber", licenseNumber);
+        setValue("licensePlateId", 1); // Временное решение для совместимости с API
+      } else {
+        setLicensePlateValidation({
+          isValid: false,
+        });
+        setValue("licensePlateId", null);
+      }
+    } catch (error) {
+      console.error("Error validating license plate:", error);
+      setLicensePlateValidation({
+        isValid: false
+      });
+      setValue("licensePlateId", null);
     }
   };
 
@@ -125,9 +166,12 @@ const AddVehicleForm = () => {
       return;
     }
 
+    console.log(data)
+
     try {
       // Подготовка данных для отправки
       const preparedData = prepareFormData(data);
+      console.log(preparedData)
 
       // Отправка данных на сервер
       await addVehicle(preparedData);
@@ -136,6 +180,7 @@ const AddVehicleForm = () => {
         alarmSystemId: null,
         ownerId: null,
         organizationId: null,
+        licenseNumber: "",
         licensePlateId: null,
         releaseDate: "",
         engineVolume: null,
@@ -150,7 +195,9 @@ const AddVehicleForm = () => {
         alarmSystemName: "",
         ownerName: "",
         organizationName: "",
-        licensePlateName: "",
+      });
+      setLicensePlateValidation({
+        isValid: null
       });
 
       // Успех: очистка формы и перенаправление
@@ -167,7 +214,7 @@ const AddVehicleForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Марка */}
         <SuggestionInput
-          placeholder="Поиск марки"
+          placeholder="Марка"
           value={displayValues.brandName}
           onChange={(value) => {
             setDisplayValues((prev) => ({ ...prev, brandName: value }));
@@ -179,7 +226,7 @@ const AddVehicleForm = () => {
 
         {/* Сигнализация */}
         <SuggestionInput
-          placeholder="Поиск сигнализации"
+          placeholder="Сигнализация"
           value={displayValues.alarmSystemName}
           onChange={(value) => {
             setDisplayValues((prev) => ({ ...prev, alarmSystemName: value }));
@@ -191,7 +238,7 @@ const AddVehicleForm = () => {
 
         {/* Владелец */}
         <SuggestionInput
-          placeholder="Поиск владельца"
+          placeholder="Владелец"
           value={displayValues.ownerName}
           onChange={(value) => {
             setDisplayValues((prev) => ({ ...prev, ownerName: value }));
@@ -203,7 +250,7 @@ const AddVehicleForm = () => {
 
         {/* Организация */}
         <SuggestionInput
-          placeholder="Поиск организации"
+          placeholder="Организация"
           value={displayValues.organizationName}
           onChange={(value) => {
             setDisplayValues((prev) => ({ ...prev, organizationName: value }));
@@ -214,18 +261,26 @@ const AddVehicleForm = () => {
         />
 
         {/* Номерной знак */}
-        <SuggestionInput
-          placeholder="Поиск номера"
-          value={displayValues.licensePlateName}
-          onChange={(value) => {
-            setDisplayValues((prev) => ({ ...prev, licensePlateName: value }));
-            setValue("licensePlateId", parseFloat(value) || null);
-          }}
-          onSelect={(suggestion) => onSuggestionSelect(suggestion, "licensePlate")}
-          fetchData={(search) => getLicensePlates({ search })}
-        />
+        <div>
+          <div>Номерной знак</div>
+          <div className="flex flex-col">
+            <input
+              type="text"
+              {...register("licenseNumber", {
+                required: "Это поле обязательно",
+                onChange: (e) => validateLicensePlateNumber(e.target.value),
+              })}
+              className={`border p-2 w-full ${
+                licensePlateValidation.isValid === false ? "border-red-500" : 
+                licensePlateValidation.isValid === true ? "border-green-500" : ""
+              }`}
+              placeholder="Введите номерной знак"
+            />
+          </div>
+        </div>
 
         {/* Дата выпуска */}
+        <div>Дата выпуска</div>
         <input
           type="date"
           {...register("releaseDate", { required: "Это поле обязательно" })}
@@ -233,6 +288,7 @@ const AddVehicleForm = () => {
         />
 
         {/* Объем двигателя */}
+        <div>Объём двигателя</div>
         <input
           type="number"
           {...register("engineVolume", { required: "Это поле обязательно" })}
@@ -240,6 +296,7 @@ const AddVehicleForm = () => {
         />
 
         {/* Номер двигателя */}
+        <div>Номер двигателя</div>
         <input
           type="text"
           {...register("engineNumber", { required: "Это поле обязательно" })}
@@ -247,6 +304,7 @@ const AddVehicleForm = () => {
         />
 
         {/* Номер шасси */}
+        <div>Номер шасси</div>
         <input
           type="text"
           {...register("chassisNumber", { required: "Это поле обязательно" })}
@@ -254,6 +312,7 @@ const AddVehicleForm = () => {
         />
 
         {/* Номер кузова */}
+        <div>Номер кузова</div>
         <input
           type="text"
           {...register("bodyNumber", { required: "Это поле обязательно" })}
@@ -261,6 +320,7 @@ const AddVehicleForm = () => {
         />
 
         {/* Цвет */}
+        <div>Цвет</div>
         <input
           type="text"
           {...register("color", { required: "Это поле обязательно" })}
@@ -268,6 +328,7 @@ const AddVehicleForm = () => {
         />
 
         {/* Тип ТС */}
+        <div>Тип ТС</div>
         <select
           {...register("vehicleType", { required: "Это поле обязательно" })}
           className="border p-2 w-full"

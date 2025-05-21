@@ -18,6 +18,7 @@ import java.util.Set;
 public class RoleManagementController {
     private final RoleManagementService roleManagementService;
 
+//
     @GetMapping("/current-user/permissions")
     public ResponseEntity<Set<PermissionResponse>> getCurrentUserPermissions() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -27,6 +28,7 @@ public class RoleManagementController {
         return ResponseEntity.ok(roleManagementService.getCurrentUserPermissions());
     }
 
+//
     @GetMapping("/check-permission")
     public ResponseEntity<Boolean> checkPermission(
             @RequestParam String resource,

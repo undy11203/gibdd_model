@@ -24,6 +24,7 @@ export interface VehicleData {
   ownerId: number;
   organizationId: number;
   licensePlateId: number;
+  licensePlateNumber?: string; // Added for direct access to the license plate number
   releaseDate: string;
   engineVolume: number;
   engineNumber: string;

@@ -37,6 +37,21 @@ public interface WantedVehicleRepository extends JpaRepository<WantedVehicle, Lo
     Page<WantedVehicle> findAllWantedByReason(String reason, Pageable pageable);
 
     @Query("SELECT w FROM WantedVehicle w " +
+            "WHERE w.status = org.web.gibdd_model.model.enums.WantedStatus.WANTED")
+    Page<WantedVehicle> findAllWantedVehicles(Pageable pageable);
+    
+    @Query("SELECT w FROM WantedVehicle w " +
+            "WHERE w.status = org.web.gibdd_model.model.enums.WantedStatus.WANTED " +
+            "AND w.addedDate BETWEEN :startDate AND :endDate")
+    Page<WantedVehicle> findAllWantedByDateRange(LocalDate startDate, LocalDate endDate, Pageable pageable);
+    
+    @Query("SELECT w FROM WantedVehicle w " +
+            "WHERE w.status = org.web.gibdd_model.model.enums.WantedStatus.WANTED " +
+            "AND w.reason = :reason " +
+            "AND w.addedDate BETWEEN :startDate AND :endDate")
+    Page<WantedVehicle> findAllWantedByReasonAndDateRange(String reason, LocalDate startDate, LocalDate endDate, Pageable pageable);
+
+    @Query("SELECT w FROM WantedVehicle w " +
             "WHERE w.status = 'FOUND' " +
             "AND w.foundDate BETWEEN :startDate AND :endDate")
     List<WantedVehicle> findAllFoundBetweenDates(LocalDate startDate, LocalDate endDate);

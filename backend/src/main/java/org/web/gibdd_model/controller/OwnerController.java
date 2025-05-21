@@ -24,6 +24,7 @@ public class OwnerController {
     @Autowired
     private OwnerService ownerService;
 
+//
     @GetMapping
     public Page<Owner> getOwners(
             @RequestParam(required = false) String search,
@@ -36,17 +37,20 @@ public class OwnerController {
         return ownerRepository.findAll(pageable);
     }
 
+//
     @PostMapping
     public Owner createOwner(@RequestBody Owner owner) {
         return ownerRepository.save(owner);
     }
 
+//
     @GetMapping("/{id}")
     public ResponseEntity<Owner> getOwnerById(@PathVariable Long id) {
         Optional<Owner> owner = ownerRepository.findById(id);
         return owner.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+//
     @PutMapping("/{id}")
     public ResponseEntity<Owner> updateOwner(@PathVariable Long id, @RequestBody Owner ownerDetails) {
         return ownerRepository.findById(id).map(owner -> {
@@ -58,6 +62,7 @@ public class OwnerController {
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+//
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteOwner(@PathVariable Long id) {
         return ownerRepository.findById(id).map(owner -> {

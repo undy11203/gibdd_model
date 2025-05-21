@@ -23,6 +23,7 @@ public class OrganizationController {
     @Autowired
     private OrganizationService organizationService;
 
+//
     @GetMapping
     public Page<Organization> getOrganizations(
             @RequestParam(required = false) String search,
@@ -35,6 +36,7 @@ public class OrganizationController {
         return organizationRepository.findAll(pageable);
     }
 
+//
     @GetMapping("/number-filter")
     public List<Object[]> getOrganizationsByNumberFilter(
             @RequestParam(required = false) String series,
@@ -46,6 +48,7 @@ public class OrganizationController {
         return organizationService.getOrganizationsByLicense(series, start, end);
     }
 
+//
     @PostMapping
     public Organization createOrganization(@RequestBody Organization organization) {
         return organizationRepository.save(organization);

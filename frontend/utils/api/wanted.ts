@@ -10,6 +10,8 @@ interface WantedVehicleQueryParams {
   reason?: string;
   page?: number;
   size?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const getWantedVehicles = async (params?: WantedVehicleQueryParams): Promise<WantedVehicleResponse> => {

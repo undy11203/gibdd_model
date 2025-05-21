@@ -4,12 +4,13 @@ import React from "react";
 import { useForm, useWatch } from "react-hook-form";
 import SuggestionInput from "../input/SuggestionInput"; // Импортируем компонент
 import { addWanted, getOwners, getVehicles } from "../../utils/api";
+import { WantedReason, WantedStatus } from "../../types/wanted";
 
 interface WantedFormData {
   vehicleId: number | null;
   addedDate: string;
-  reason: string;
-  status: "WANTED" | "FOUND";
+  reason: WantedReason;
+  status: WantedStatus;
   ownerName: string;
   ownerId: number | null;
 }
@@ -26,8 +27,8 @@ const AddWantedForm = () => {
     defaultValues: {
       vehicleId: null,
       addedDate: "",
-      reason: "",
-      status: "WANTED",
+      reason: WantedReason.THEFT,
+      status: WantedStatus.WANTED,
       ownerName: "",
       ownerId: null,
     },
@@ -73,8 +74,8 @@ const AddWantedForm = () => {
       reset({
         vehicleId: null,
         addedDate: "",
-        reason: "",
-        status: "WANTED",
+        reason: WantedReason.THEFT,
+        status: WantedStatus.WANTED,
         ownerName: "",
         ownerId: null,
       });
@@ -136,11 +137,13 @@ const AddWantedForm = () => {
       <label htmlFor="reason" className="block text-sm font-medium text-gray-700">
         Причина
       </label>
-      <input
-        type="text"
+      <select
         {...register("reason", { required: "Это поле обязательно" })}
         className={`border p-2 w-full`}
-      />
+      >
+        <option value={WantedReason.THEFT}>Угон</option>
+        <option value={WantedReason.HIT_AND_RUN}>Скрылся с места ДТП</option>
+      </select>
 
       {/* Статус */}
       <label htmlFor="status" className="block text-sm font-medium text-gray-700">
@@ -150,8 +153,8 @@ const AddWantedForm = () => {
         {...register("status", { required: "Это поле обязательно" })}
         className={`border p-2 w-full`}
       >
-        <option value="WANTED">Розыскивается</option>
-        <option value="FOUND">Найден</option>
+        <option value={WantedStatus.WANTED}>Розыскивается</option>
+        <option value={WantedStatus.FOUND}>Найден</option>
       </select>
 
       {/* Кнопка отправки */}

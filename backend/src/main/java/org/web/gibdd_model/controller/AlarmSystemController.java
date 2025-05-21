@@ -20,13 +20,12 @@ public class AlarmSystemController {
     }
 
     @GetMapping
-    public List<AlarmSystem> getAlarmSystems(
-            @RequestParam(required = false) String search) {
+    public Page<AlarmSystem> getAlarmSystems(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit) {
         
-        return alarmSystemRepository.findByNameContaining(
-            search != null ? search : "", 
-            org.springframework.data.domain.Pageable.unpaged()
-        ).getContent();
+        return alarmSystemRepository.findByNameContaining(search, PageRequest.of(page, limit));
     }
 
     @GetMapping("/reliable")

@@ -12,6 +12,7 @@ import org.web.gibdd_model.model.enums.AccidentType;
 import org.web.gibdd_model.service.AccidentService;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,4 +86,19 @@ public class AccidentController {
         DrunkDrivingStatsDTO stats = accidentService.getDrunkDrivingStatistics();
         return ResponseEntity.ok(stats);
     }
+
+    @GetMapping("/accident-types")
+    public ResponseEntity<Collection<Object>> getAccidentTypes() {
+        if (accidentService.getAccidentTypes().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(accidentService.getAccidentTypes());
+        }
+    }
+
+    @GetMapping("/accident-roles")
+    public ResponseEntity<Collection<Object>> getAccidentRoles() {
+        return ResponseEntity.ok(accidentService.getAccidentRoles());
+    }
+
 }

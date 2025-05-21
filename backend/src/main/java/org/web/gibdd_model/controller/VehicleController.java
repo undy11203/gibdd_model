@@ -23,6 +23,7 @@ import org.web.gibdd_model.repository.AlarmSystemRepository;
 import org.web.gibdd_model.repository.LicensePlateRepository;
 import org.web.gibdd_model.service.VehicleService;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @RestController
@@ -216,4 +217,8 @@ public class VehicleController {
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/vehicle-types")
+    public ResponseEntity<Collection<Object>> getVehicleTypes() {
+        return ResponseEntity.ok().body(vehicleService.getVehicleTypes());
+    }
 }

@@ -3,9 +3,12 @@ package org.web.gibdd_model.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web.gibdd_model.model.Vehicle;
+import org.web.gibdd_model.model.enums.VehicleType;
 import org.web.gibdd_model.repository.VehicleRepository;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class VehicleService {
@@ -40,5 +43,11 @@ public class VehicleService {
 
     public org.web.gibdd_model.model.Owner getOwnerByLicenseNumber(String licenseNumber) {
         return vehicleRepository.findOwnerByLicenseNumber(licenseNumber);
+    }
+
+    public Collection<Object> getVehicleTypes() {
+        return List.of(Stream.of(VehicleType.values())
+                .map(VehicleType::getDescription)
+                .toArray(String[]::new));
     }
 }

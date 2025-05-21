@@ -16,14 +16,18 @@ import org.web.gibdd_model.model.AccidentParticipant;
 import org.web.gibdd_model.model.Vehicle;
 import org.web.gibdd_model.model.Owner;
 import java.util.ArrayList;
+
+import org.web.gibdd_model.model.enums.AccidentRole;
 import org.web.gibdd_model.model.enums.AccidentType;
 import org.web.gibdd_model.repository.AccidentRepository;
 import org.web.gibdd_model.repository.VehicleRepository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class AccidentService {
@@ -245,5 +249,17 @@ public class AccidentService {
         } catch (Exception e) {
             throw new RuntimeException("Error processing drunk driving statistics", e);
         }
+    }
+
+    public Collection<Object> getAccidentTypes() {
+        return List.of(Stream.of(AccidentType.values())
+                .map(AccidentType::getDescription)
+                .toArray(String[]::new));
+    }
+
+    public Collection<Object> getAccidentRoles() {
+        return List.of(Stream.of(AccidentRole.values())
+                .map(AccidentRole::getDescription)
+                .toArray(String[]::new));
     }
 }

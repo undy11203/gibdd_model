@@ -7,11 +7,14 @@ import org.springframework.stereotype.Service;
 import org.web.gibdd_model.dto.WantedVehicleDTO;
 import org.web.gibdd_model.dto.WantedVehicleStatsDTO;
 import org.web.gibdd_model.model.WantedVehicle;
+import org.web.gibdd_model.model.enums.WantedStatus;
 import org.web.gibdd_model.repository.WantedVehicleRepository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class WantedService {
@@ -99,5 +102,11 @@ public class WantedService {
                     return wantedVehicleRepository.save(vehicle);
                 })
                 .orElseThrow(() -> new RuntimeException("Wanted vehicle not found with id: " + id));
+    }
+
+    public Collection<Object> getWantedVehicleStatus() {
+        return List.of(Stream.of(WantedStatus.values())
+                .map(WantedStatus::getDescription)
+                .toArray(String[]::new));
     }
 }

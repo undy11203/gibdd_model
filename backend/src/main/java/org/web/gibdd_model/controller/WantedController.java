@@ -11,10 +11,12 @@ import org.web.gibdd_model.dto.WantedVehicleDTO;
 import org.web.gibdd_model.dto.WantedVehicleStatsDTO;
 import org.web.gibdd_model.model.Vehicle;
 import org.web.gibdd_model.model.WantedVehicle;
+import org.web.gibdd_model.model.enums.WantedStatus;
 import org.web.gibdd_model.repository.VehicleRepository;
 import org.web.gibdd_model.service.WantedService;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -98,5 +100,10 @@ public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicleDTO w
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/wanted-status")
+    public ResponseEntity<Collection<Object>> getWantedVehicleStatus() {
+        return ResponseEntity.ok().body(wantedService.getWantedVehicleStatus());
     }
 }

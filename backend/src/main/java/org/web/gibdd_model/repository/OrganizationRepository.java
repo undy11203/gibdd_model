@@ -17,13 +17,11 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     Page<Organization> findByNameContaining(String name, Pageable pageable);
 
     //Получить перечень и общее число организаций, которым выделены номера либо с указанной серией, либо за указанный период
-    @Query("SELECT o.name AS organizationName, COUNT(o) AS totalCount " +
+    @Query("SELECT o AS organizationName " +
             "FROM Organization o " +
             "JOIN Vehicle a ON o.id = a.organization.id " +
             "JOIN a.licensePlate n " +
-            "WHERE (n.series = :series OR n.date BETWEEN :startDate AND :endDate) " +
-            "GROUP BY o.name")
-    List<Object[]> findOrganizationsByLicense(@Param("series") String series,
-                                              @Param("startDate") LocalDate startDate,
-                                              @Param("endDate") LocalDate endDate);
+            "WHERE (n.series = :series) " +
+            "GROUP BY o.id")
+    Page<Organization> findOrganizationsByLicense(@Param("series") String series, Pageable pageable);
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getWantedVehicles, getWantedVehicleStats } from '../../utils/api/wanted';
-import { WantedVehicle, WantedVehicleStats } from '../../types/wanted'; // Removed WantedReason, WantedStatus
+import { getWantedVehicles, getWantedVehicleStats, markAsFound, getWantedStatusValues } from '../../utils/api/wanted';
+import { WantedVehicle, WantedVehicleStats } from '../../types/wanted';
 import { PageResponse } from '../../types/common';
 
 //8. Получить список машин, отданных в розыск, будь то скрывшиеся с места ДТП или угнанные.
@@ -16,9 +16,11 @@ const WantedVehiclesDisplay = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [selectedReason, setSelectedReason] = useState<string>(''); // Was WantedReason | ''
+  const [selectedReason, setSelectedReason] = useState<string>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [statusOptions, setStatusOptions] = useState<string[]>([]);
+  const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,19 +31,21 @@ const WantedVehiclesDisplay = () => {
         // Prepare date parameters if both dates are provided
         const dateParams = (startDate && endDate) ? { startDate, endDate } : {};
         
-        const [vehiclesResponse, statsResponse] = await Promise.all([
+        const [vehiclesResponse, statsResponse, statusValues] = await Promise.all([
           getWantedVehicles({ 
             reason: selectedReason, 
             page, 
             size: 10,
             ...dateParams
           }),
-          getWantedVehicleStats()
+          getWantedVehicleStats(),
+          getWantedStatusValues()
         ]);
 
         setVehicles(vehiclesResponse.content);
         setTotalPages(vehiclesResponse.totalPages);
         setStats(statsResponse);
+        setStatusOptions(statusValues);
       } catch (err) {
         console.error(err);
         setError('Ошибка при загрузке данных');
@@ -170,7 +174,8 @@ const WantedVehiclesDisplay = () => {
               <th className="px-4 py-2">Марка</th>
               <th className="px-4 py-2">Цвет</th>
               <th className="px-4 py-2">Причина</th>
-              <th className="px-4 py-2">Дата</th>
+              <th className="px-4 py-2">Дата поиска</th>
+              <th className="px-4 py-2">Дата окончания</th>
               <th className="px-4 py-2">Статус</th>
             </tr>
           </thead>
@@ -181,15 +186,68 @@ const WantedVehiclesDisplay = () => {
                 <td className="px-4 py-2">{vehicle.vehicle.brand?.name || 'Неизвестно'}</td>
                 <td className="px-4 py-2">{vehicle.vehicle.color || 'Неизвестно'}</td>
                 <td className="px-4 py-2">
-                  {/* Assuming vehicle.reason from backend is a key like "THEFT" or "HIT_AND_RUN" */}
                   {vehicle.reason === 'HIT_AND_RUN' ? 'Скрылся с места ДТП' : vehicle.reason === 'THEFT' ? 'Угон' : vehicle.reason}
                 </td>
                 <td className="px-4 py-2">
                   {new Date(vehicle.addedDate).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-2">
-                  {/* vehicle.status is now the description string e.g. "Розыскивается" */}
-                  {vehicle.status}
+                  {vehicle.foundDate ? new Date(vehicle.foundDate).toLocaleDateString() : '-'}
+                </td>
+                <td className="px-4 py-2">
+                  {updatingStatus === vehicle.id ? (
+                    <div className="flex items-center">
+                      <select 
+                        className="p-1 border rounded mr-2 text-sm"
+                        defaultValue={vehicle.status}
+                        onChange={async (e) => {
+                          try {
+                            const newStatus = e.target.value;
+                            const isFound = newStatus.toLowerCase().includes('найден');
+                            
+                            if (isFound && !vehicle.foundDate) {
+                              // If marking as found, we need to set the found date
+                              const today = new Date().toISOString().split('T')[0];
+                              await markAsFound(vehicle.id, today);
+                            }
+                            
+                            // Refresh the data
+                            setUpdatingStatus(null);
+                            // Trigger a refetch by changing the page (and then changing it back)
+                            const currentPage = page;
+                            setPage(-1);
+                            setTimeout(() => setPage(currentPage), 100);
+                          } catch (err) {
+                            console.error('Failed to update status:', err);
+                            setError('Не удалось обновить статус');
+                            setUpdatingStatus(null);
+                          }
+                        }}
+                      >
+                        {statusOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      <button 
+                        className="text-gray-500 hover:text-gray-700"
+                        onClick={() => setUpdatingStatus(null)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <span className={`${vehicle.status.toLowerCase().includes('найден') ? 'text-green-600' : 'text-red-600'}`}>
+                        {vehicle.status}
+                      </span>
+                      <button 
+                        className="ml-2 text-blue-500 hover:text-blue-700 text-sm"
+                        onClick={() => setUpdatingStatus(vehicle.id)}
+                      >
+                        ✎
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

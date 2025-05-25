@@ -2,16 +2,12 @@
 
 import { getOverdueInspections } from "@/utils/api";
 import React, { useEffect, useState } from "react";
-
-interface OwnerOverdueInspection {
-  fullName: string;
-  totalCount: number;
-}
+import { OverdueInspectionInfo } from "@/types/inspections";
 
 // 4. Получить перечень и общее число владельцев машин не прошедших вовремя техосмотр.
 
 const OwnersWithOverdueInspection = () => {
-  const [owners, setOwners] = useState<OwnerOverdueInspection[]>([]);
+  const [owners, setOwners] = useState<OverdueInspectionInfo[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,20 +17,9 @@ const OwnersWithOverdueInspection = () => {
       try {
         const overdueInspections = await getOverdueInspections();
         
-        // Группируем владельцев по полному имени и считаем количество
-        const ownerMap: Record<string, OwnerOverdueInspection> = {};
-        
-        overdueInspections.forEach((inspection) => {
-          const ownerName = inspection.owner.fullName;
-          if (!ownerMap[ownerName]) {
-            ownerMap[ownerName] = { fullName: ownerName, totalCount: 0 };
-          }
-          ownerMap[ownerName].totalCount += 1;
-        });
-
-        const ownerList = Object.values(ownerMap);
-        setOwners(ownerList);
-        setTotalCount(ownerList.length);
+        // Backend now returns data in the correct format directly
+        setOwners(overdueInspections);
+        setTotalCount(overdueInspections.length);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {

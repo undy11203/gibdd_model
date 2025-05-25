@@ -10,5 +10,5 @@ public class WantedVehicleDTO {
     private Long vehicleId;
     private LocalDate addedDate;
     private String reason;
-    private WantedStatus status;
+    private String status;
 }

@@ -21,10 +21,14 @@ public interface OwnerRepository extends JpaRepository<Owner, Long> {
     List<Object[]> findOwnerByLicensePlate(@Param("licensePlate") String licensePlate);
 
     //Владельцы не прошедших техосмотр машин
-    @Query("SELECT v.fullName, COUNT(*) OVER () AS totalCount " +
-            "FROM Owner v " +
-            "JOIN Vehicle a ON v.id = a.owner.id " +
-            "JOIN TechnicalInspection tos ON a.id = tos.vehicle.id " +
-            "WHERE tos.nextInspectionDate < CURRENT_DATE")
+    @Query("SELECT v.fullName, COUNT(tos.id) AS totalCount " +
+       "FROM Owner v " +
+       "JOIN Vehicle a ON v.id = a.owner.id " +
+       "JOIN TechnicalInspection tos ON a.id = tos.vehicle.id " +
+       "WHERE tos.nextInspectionDate = (SELECT MAX(tos2.nextInspectionDate) " +
+                                        "FROM TechnicalInspection tos2 " +
+                                        "WHERE tos2.vehicle.id = a.id) " +
+       "AND tos.nextInspectionDate < CURRENT_DATE " +
+       "GROUP BY v.fullName")
     List<Object[]> findOwnersWithOverdueInspection();
 }

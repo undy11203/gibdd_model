@@ -17,20 +17,8 @@ export interface InspectionData {
 }
 
 export interface OverdueInspectionInfo {
-  owner: {
-    fullName: string;
-    address: string;
-  };
-  vehicle: {
-    licensePlate: {
-      licenseNumber: string;
-    };
-    brand: {
-      name: string;
-    };
-  };
-  lastInspectionDate: string;
-  daysOverdue: number;
+  fullName: string;
+  totalCount: number;
 }
 
 export type InspectionResponse = PageResponse<TechnicalInspection>;

@@ -10,7 +10,6 @@ import org.web.gibdd_model.model.Organization;
 import org.web.gibdd_model.repository.OrganizationRepository;
 import org.web.gibdd_model.service.OrganizationService;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -38,14 +37,12 @@ public class OrganizationController {
 
 //
     @GetMapping("/number-filter")
-    public List<Object[]> getOrganizationsByNumberFilter(
+    public Page<Organization> getOrganizationsByNumberFilter(
             @RequestParam(required = false) String series,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-        // Parse dates if provided
-        java.time.LocalDate start = (startDate != null && !startDate.isEmpty()) ? java.time.LocalDate.parse(startDate) : java.time.LocalDate.MIN;
-        java.time.LocalDate end = (endDate != null && !endDate.isEmpty()) ? java.time.LocalDate.parse(endDate) : java.time.LocalDate.MAX;
-        return organizationService.getOrganizationsByLicense(series, start, end);
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
+        return organizationService.getOrganizationsByLicense(series, pageable);
     }
 
 //

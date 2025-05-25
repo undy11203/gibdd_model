@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { getOrganizations, getOrganizationsByNumberFilter } from '../../utils/api/organizations';
 import { Organization } from '../../types/organizations';
@@ -23,13 +21,17 @@ const OrganizationsDisplay = () => {
 
       let response;
       if (series) {
+        // Используем метод findOrganizationsByLicense для получения организаций по серии
         response = await getOrganizationsByNumberFilter({
-          series: series || undefined
+          series: series || undefined,
+          page: page,
+          limit: 10
         });
       } else {
         response = await getOrganizations({ page, limit: 10 });
       }
 
+      console.log(response);
       setOrganizations(response.content);
       setTotalCount(response.totalElements);
       setTotalPages(response.totalPages);
@@ -55,19 +57,12 @@ const OrganizationsDisplay = () => {
     setPage(0);
   };
 
-  if (loading) {
-    return <div className="text-center p-4">Загрузка данных...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center p-4">{error}</div>;
-  }
-
   return (
     <div className="space-y-6">
       {/* Фильтры */}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium mb-4">Фильтры поиска</h3>
+        {error && <div className="text-red-500 mb-4">{error}</div>} {/* Отображение ошибки в области фильтров */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

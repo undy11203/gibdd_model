@@ -17,8 +17,8 @@ export interface OrganizationData {
 
 export interface OrganizationNumberFilterParams {
   series?: string;
-  startDate?: string;
-  endDate?: string;
+  page?: number;
+  limit?: number;
 }
 
 export type OrganizationResponse = PageResponse<Organization>;

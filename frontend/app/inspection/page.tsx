@@ -14,18 +14,6 @@ export default function InspectionPage() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchInspections = async () => {
-      try {
-        // const response = await getInspections({});
-        // setInspections(response.content);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchInspections();
-  }, []);
-
   const tabs = [
     { id: 'list', label: 'Список владельцев просрочивших техосмотр' },
     { id: 'add', label: 'Зарегистировать техосмотр' },
@@ -59,14 +47,6 @@ export default function InspectionPage() {
 
       {activeTab === 'list' && (
         <>
-          <h2 className="text-xl font-semibold mb-2">List of Technical Inspections</h2>
-          <ul className="space-y-2 mb-6">
-            {inspections != undefined && inspections.map((inspection) => (
-              <li key={inspection.id} className="border p-2">
-                <strong>{inspection.vehicle?.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {inspection.vehicle?.brand?.name ?? 'Unknown Brand'}, {inspection.inspectionDate}, {inspection.result}
-              </li>
-            ))}
-          </ul>
           <OwnersWithOverdueInspection />
         </>
       )}

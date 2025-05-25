@@ -68,26 +68,26 @@ public class WantedController {
         return wantedService.getFoundVehiclesBetweenDates(startDate, endDate);
     }
 
-//
-@PostMapping
-public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicleDTO wantedVehicleDTO) {
-    // Convert DTO to entity
-    WantedVehicle wantedVehicle = new WantedVehicle();
-    
-    // Find the vehicle by ID
-    Vehicle vehicle = vehicleRepository.findById(wantedVehicleDTO.getVehicleId())
-            .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + wantedVehicleDTO.getVehicleId()));
-    
-    // Set the properties from DTO to entity
-    wantedVehicle.setVehicle(vehicle);
-    wantedVehicle.setAddedDate(wantedVehicleDTO.getAddedDate());
-    wantedVehicle.setReason(wantedVehicleDTO.getReason());
-    wantedVehicle.setStatus(wantedVehicleDTO.getStatus());
-    
-    // Save the entity
-    WantedVehicle saved = wantedService.addToWanted(wantedVehicle);
-    return ResponseEntity.ok(saved);
-}
+    //
+    @PostMapping
+    public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicleDTO wantedVehicleDTO) {
+        // Convert DTO to entity
+        WantedVehicle wantedVehicle = new WantedVehicle();
+
+        // Find the vehicle by ID
+        Vehicle vehicle = vehicleRepository.findById(wantedVehicleDTO.getVehicleId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + wantedVehicleDTO.getVehicleId()));
+
+        // Set the properties from DTO to entity
+        wantedVehicle.setVehicle(vehicle);
+        wantedVehicle.setAddedDate(wantedVehicleDTO.getAddedDate());
+        wantedVehicle.setReason(wantedVehicleDTO.getReason());
+        wantedVehicle.setStatus(WantedStatus.fromDescription(wantedVehicleDTO.getStatus()));
+
+        // Save the entity
+        WantedVehicle saved = wantedService.addToWanted(wantedVehicle);
+        return ResponseEntity.ok(saved);
+    }
 
 //
     @PutMapping("/{id}/found")

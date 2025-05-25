@@ -26,6 +26,7 @@ import org.web.gibdd_model.repository.LicensePlateRepository;
 import org.web.gibdd_model.service.VehicleService;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -166,55 +167,60 @@ public class VehicleController {
     }
 
     private void updateFreeLicensePlateRange(String series, int allocatedNumber) {
-        freeLicensePlateRangeRepository.findById_Series(series).ifPresent(range -> {
+        List<FreeLicensePlateRange> ranges = freeLicensePlateRangeRepository.findBySeries(series);
+
+        for (FreeLicensePlateRange range : ranges) {
             if (range.getStartNumber() == allocatedNumber) {
-                // If the allocated number is at the start of the range, increment the start
-                // Create a new range with updated start number
+                // Если выделенный номер на начале диапазона, увеличиваем начало
                 FreeLicensePlateRange updatedRange = FreeLicensePlateRange.create(
-                    series, 
-                    allocatedNumber + 1, 
-                    range.getEndNumber()
+                        series,
+                        allocatedNumber + 1,
+                        range.getEndNumber()
                 );
-                
-                // Delete the old range and save the new one
+
+                // Удаляем старый диапазон и сохраняем новый
                 freeLicensePlateRangeRepository.delete(range);
                 freeLicensePlateRangeRepository.save(updatedRange);
+                break;
             } else if (range.getEndNumber() == allocatedNumber) {
-                // If the allocated number is at the end of the range, decrement the end
-                // Create a new range with updated end number
+                // Если выделенный номер на конце диапазона, уменьшаем конец
                 FreeLicensePlateRange updatedRange = FreeLicensePlateRange.create(
-                    series, 
-                    range.getStartNumber(), 
-                    allocatedNumber - 1
+                        series,
+                        range.getStartNumber(),
+                        allocatedNumber - 1
                 );
-                
-                // Delete the old range and save the new one
+
+                // Удаляем старый диапазон и сохраняем новый
                 freeLicensePlateRangeRepository.delete(range);
                 freeLicensePlateRangeRepository.save(updatedRange);
+                break;
             } else if (allocatedNumber > range.getStartNumber() && allocatedNumber < range.getEndNumber()) {
-                // If the allocated number is in the middle of the range, split it into two ranges
-                
-                // Create first range (from original start to just before allocated number)
+                // Если выделенный номер находится в середине диапазона, делим его на два диапазона
+
+                // Создаем первый диапазон (от оригинального начала до номера перед выделенным)
                 FreeLicensePlateRange firstRange = FreeLicensePlateRange.create(
-                    series, 
-                    range.getStartNumber(), 
-                    allocatedNumber - 1
+                        series,
+                        range.getStartNumber(),
+                        allocatedNumber - 1
                 );
-                
-                // Create second range (from just after allocated number to original end)
+
+                // Создаем второй диапазон (от номера после выделенного до оригинального конца)
                 FreeLicensePlateRange secondRange = FreeLicensePlateRange.create(
-                    series, 
-                    allocatedNumber + 1, 
-                    range.getEndNumber()
+                        series,
+                        allocatedNumber + 1,
+                        range.getEndNumber()
                 );
-                
-                // Delete the original range and save the two new ranges
+
+                // Удаляем оригинальный диапазон и сохраняем два новых диапазона
                 freeLicensePlateRangeRepository.delete(range);
                 freeLicensePlateRangeRepository.save(firstRange);
                 freeLicensePlateRangeRepository.save(secondRange);
+
+                break;
             }
-        });
+        }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Vehicle> getVehicleById(@PathVariable Long id) {

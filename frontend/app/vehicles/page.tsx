@@ -7,6 +7,8 @@ import { getVehicles } from '../../utils/api/vehicles';
 import { Vehicle } from '../../types/vehicles';
 import CRUDBrand from '@/components/CRUDBrand';
 import CRUDAlarmSystem from '@/components/CRUDAlarmSystem';
+import { PermissionGate } from '@/components/common/PermissionGate';
+import BackButton from '@/components/common/BackButton';
 
 export default function Vehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -32,61 +34,75 @@ export default function Vehicles() {
   ];
 
   return (
-    <div className="p-4">
-      <button
-        onClick={() => window.history.back()}
-        className="mb-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-      <h1 className="text-2xl font-bold mb-4">Транспортные средства</h1>
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <BackButton className="mb-0" />
+          <h1 className="text-3xl font-bold">Транспортные средства</h1>
+        </div>
+      </div>
 
-      <TabNav 
-        tabs={tabs} 
-        activeTab={activeTab} 
-        onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
-      />
+      <div className="mb-6">
+        <TabNav 
+          tabs={tabs} 
+          activeTab={activeTab} 
+          onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
+        />
+      </div>
 
       {activeTab === 'list' && (
-        <>
-          <h2 className="text-xl font-semibold mb-2">Список транспортных средств</h2>
+        <PermissionGate 
+          resource="vehicles" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра транспортных средств
+          </div>}
+        >
+          <h2 className="text-xl font-semibold mb-4">Список транспортных средств</h2>
           <ul className="space-y-2 mb-6">
             {vehicles != undefined && vehicles.map((vehicle) => (
-              <li key={vehicle.id} className="border p-2">
+              <li key={vehicle.id} className="border p-2 rounded">
                 <strong>{vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {vehicle.brand?.name ?? 'Unknown Brand'}, {vehicle.releaseDate}, {vehicle.owner?.fullName ?? 'Unknown Owner'}
               </li>
             ))}
           </ul>
-        </>
+        </PermissionGate>
       )}
 
       {activeTab === 'register' && (
-        <>
+        <PermissionGate 
+          resource="vehicles" 
+          action="write"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для регистрации транспортных средств
+          </div>}
+        >
           <AddVehicleForm />
-        </>
+        </PermissionGate>
       )}
 
       {activeTab === 'brand' && (
-        <>
+        <PermissionGate 
+          resource="vehicles" 
+          action="write"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для управления марками машин
+          </div>}
+        >
           <CRUDBrand />
-        </>
+        </PermissionGate>
       )}
 
       {activeTab === 'alarm-system' && (
-        <>
+        <PermissionGate 
+          resource="vehicles" 
+          action="write"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для управления сигнализациями
+          </div>}
+        >
           <CRUDAlarmSystem />
-        </>
+        </PermissionGate>
       )}
     </div>
   );

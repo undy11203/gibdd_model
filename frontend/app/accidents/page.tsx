@@ -6,6 +6,7 @@ import BackButton from '../../components/common/BackButton';
 import AccidentStatistics from '../../components/pro_search/AccidentStatistics';
 import AccidentAnalysisDisplay from '../../components/pro_search/AccidentAnalysisDisplay';
 import AddAccidentForm from '../../components/forms/AddAccidentForm';
+import { PermissionGate } from '@/components/common/PermissionGate';
 
 const tabs = [
   { id: 'statistics', label: 'Статистика по типам' },
@@ -33,9 +34,41 @@ export default function AccidentsPage() {
         />
       </div>
 
-      {activeTab === 'statistics' && <AccidentStatistics />}
-      {activeTab === 'analysis' && <AccidentAnalysisDisplay />}
-      {activeTab === 'register' && <AddAccidentForm />}
+      {activeTab === 'statistics' && (
+        <PermissionGate 
+          resource="statistics" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра статистики ДТП
+          </div>}
+        >
+          <AccidentStatistics />
+        </PermissionGate>
+      )}
+      
+      {activeTab === 'analysis' && (
+        <PermissionGate 
+          resource="accidents" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра анализа ДТП
+          </div>}
+        >
+          <AccidentAnalysisDisplay />
+        </PermissionGate>
+      )}
+      
+      {activeTab === 'register' && (
+        <PermissionGate 
+          resource="accidents" 
+          action="write"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для регистрации ДТП
+          </div>}
+        >
+          <AddAccidentForm />
+        </PermissionGate>
+      )}
     </div>
   );
 }

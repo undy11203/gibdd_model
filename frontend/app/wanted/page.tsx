@@ -5,6 +5,7 @@ import TabNav from '../../components/common/TabNav';
 import BackButton from '../../components/common/BackButton';
 import WantedVehiclesDisplay from '../../components/pro_search/WantedVehiclesDisplay';
 import AddWantedVehicleForm from '../../components/forms/AddWantedVehicleForm';
+import { PermissionGate } from '@/components/common/PermissionGate';
 
 const tabs = [
   { id: 'list', label: 'Список розыска' },
@@ -33,7 +34,13 @@ export default function WantedPage() {
       </div>
 
       {activeTab === 'list' && (
-        <>
+        <PermissionGate 
+          resource="wanted" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра списка розыска
+          </div>}
+        >
           <div className="mb-6">
             <p className="text-gray-600">
               Здесь вы можете просмотреть информацию о транспортных средствах в розыске, 
@@ -42,11 +49,17 @@ export default function WantedPage() {
             </p>
           </div>
           <WantedVehiclesDisplay key={refreshTrigger} />
-        </>
+        </PermissionGate>
       )}
 
       {activeTab === 'add' && (
-        <>
+        <PermissionGate 
+          resource="wanted" 
+          action="write"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для добавления транспортных средств в розыск
+          </div>}
+        >
           <div className="mb-6">
             <p className="text-gray-600">
               Заполните форму для добавления транспортного средства в розыск. 
@@ -54,7 +67,7 @@ export default function WantedPage() {
             </p>
           </div>
           <AddWantedVehicleForm />
-        </>
+        </PermissionGate>
       )}
     </div>
   );

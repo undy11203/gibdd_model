@@ -4,7 +4,7 @@ import { useState } from 'react';
 import TabNav from '../../components/common/TabNav';
 import BackButton from '../../components/common/BackButton';
 import OrganizationsDisplay from '../../components/pro_search/OrganizationsDisplay';
-import OrganizationNumberFilter from '../../components/pro_search/OrganizationNumberFilter';
+import { PermissionGate } from '@/components/common/PermissionGate';
 
 const tabs = [
   { id: 'list', label: 'Список организаций' },
@@ -31,9 +31,15 @@ export default function OrganizationsPage() {
       </div>
 
       {activeTab === 'list' && (
-        <>
+        <PermissionGate 
+          resource="vehicles" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра списка организаций
+          </div>}
+        >
           <OrganizationsDisplay />
-        </>
+        </PermissionGate>
       )}
     </div>
   );

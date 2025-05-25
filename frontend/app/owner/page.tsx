@@ -5,6 +5,7 @@ import TabNav from '../../components/common/TabNav';
 import BackButton from '../../components/common/BackButton';
 import OwnerForm from '../../components/forms/OwnerForm';
 import OwnerInfoByLicensePlate from '../../components/pro_search/OwnerInfoByLicensePlate';
+import { PermissionGate } from '../../components/common/PermissionGate';
 
 const tabs = [
   { id: 'search', label: 'Поиск информации' },
@@ -32,25 +33,37 @@ export default function OwnerPage() {
       </div>
 
       {activeTab === 'search' && (
-        <>
+        <PermissionGate 
+          resource="owners" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра информации о владельцах
+          </div>}
+        >
           <div className="mb-6">
             <p className="text-gray-600">
               Поиск информации о владельце и автомобиле по государственному номеру. Получение полного досье на автомобиль, включая номера двигателя, кузова и шасси, данные о ДТП и техосмотре.
             </p>
           </div>
           <OwnerInfoByLicensePlate />
-        </>
+        </PermissionGate>
       )}
 
       {activeTab === 'register' && (
-        <>
+        <PermissionGate 
+          resource="owners" 
+          action="write"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для регистрации новых владельцев
+          </div>}
+        >
           <div className="mb-6">
             <p className="text-gray-600">
               Регистрация нового владельца транспортного средства в системе.
             </p>
           </div>
           <OwnerForm />
-        </>
+        </PermissionGate>
       )}
     </div>
   );

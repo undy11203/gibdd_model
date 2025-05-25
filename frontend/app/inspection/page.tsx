@@ -1,60 +1,72 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import AddTechnicalInspectionForm from '../../components/forms/AddTechnicalInspectionForm';
+import { useState } from 'react';
 import TabNav from '../../components/common/TabNav';
-import OwnersWithOverdueInspection from '@/components/pro_search/OwnersWithOverdueInspection';
-// import { TechnicalInspection } from "'types"' (see below for file content)
-// import { getInspections } from ''utils/api'' (see below for file content);
+import BackButton from '../../components/common/BackButton';
+import AddTechnicalInspectionForm from '../../components/forms/AddTechnicalInspectionForm';
+import OwnersWithOverdueInspection from '../../components/pro_search/OwnersWithOverdueInspection';
+import { PermissionGate } from '@/components/common/PermissionGate';
+
+const tabs = [
+  { id: 'list', label: 'Просроченные ТО' },
+  { id: 'add', label: 'Добавить ТО' }
+];
 
 export default function InspectionPage() {
-  const [inspections, setInspections] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('list');
-
-  const router = useRouter();
-
-  const tabs = [
-    { id: 'list', label: 'Список владельцев просрочивших техосмотр' },
-    { id: 'add', label: 'Зарегистировать техосмотр' },
-  ];
-
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-  };
+  const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
 
   return (
-    <div className="p-4">
-      <button
-        onClick={() => window.history.back()}
-        className="mb-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <BackButton className="mb-0" />
+          <h1 className="text-3xl font-bold">Технический осмотр</h1>
+        </div>
+      </div>
 
-      <TabNav tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} />
+      <div className="mb-6">
+        <TabNav 
+          tabs={tabs} 
+          activeTab={activeTab} 
+          onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
+        />
+      </div>
 
       {activeTab === 'list' && (
-        <>
+        <PermissionGate 
+          resource="inspections" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра информации о технических осмотрах
+          </div>}
+        >
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Список владельцев с просроченным техническим осмотром. Система автоматически 
+              определяет просроченные ТО на основе даты последнего осмотра и установленной 
+              периодичности для данного типа ТС.
+            </p>
+          </div>
           <OwnersWithOverdueInspection />
-        </>
+        </PermissionGate>
       )}
 
       {activeTab === 'add' && (
-        <div>
+        <PermissionGate 
+          resource="inspections" 
+          action="write"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для регистрации технических осмотров
+          </div>}
+        >
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Регистрация нового технического осмотра транспортного средства. 
+              Укажите номерной знак ТС, дату проведения и результат осмотра.
+            </p>
+          </div>
           <AddTechnicalInspectionForm />
-        </div>
+        </PermissionGate>
       )}
     </div>
   );

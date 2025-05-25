@@ -1,51 +1,72 @@
-"use client";
+'use client';
 
-import dynamic from 'next/dynamic';
-import React from 'react';
-import { PermissionGate } from '../../components/common/PermissionGate';
-import BackButton from '@/components/common/BackButton';
+import { useState } from 'react';
+import TabNav from '../../components/common/TabNav';
+import BackButton from '../../components/common/BackButton';
+import SqlQueryExecutor from '../../components/admin/SqlQueryExecutor';
+import { RoleManagement } from '../../components/admin/RoleManagement';
+import { PermissionGate } from '@/components/common/PermissionGate';
 
-// Dynamically import components with SSR disabled to avoid hydration issues
-const SqlQueryExecutor = dynamic(
-  () => import('../../components/admin/SqlQueryExecutor'),
-  { ssr: false }
-);
-
-const RoleManagement = dynamic(
-  () => import('../../components/admin/RoleManagement').then(mod => ({ default: mod.RoleManagement })),
-  { ssr: false }
-);
+const tabs = [
+  { id: 'sql', label: 'SQL запросы' },
+  { id: 'roles', label: 'Управление ролями' }
+];
 
 export default function AdminPage() {
+  const [activeTab, setActiveTab] = useState<'sql' | 'roles'>('sql');
+
   return (
     <div className="container mx-auto p-4">
-      <BackButton className="mb-0" />
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      
-      <div className="space-y-8">
-        {/* SQL Query Executor - protected by sql_execute permission */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <BackButton className="mb-0" />
+          <h1 className="text-3xl font-bold">Администрирование</h1>
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <TabNav 
+          tabs={tabs} 
+          activeTab={activeTab} 
+          onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
+        />
+      </div>
+
+      {activeTab === 'sql' && (
         <PermissionGate 
           resource="sql" 
           action="execute"
-          fallback={<div>You don't have permission to execute SQL queries.</div>}
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для выполнения SQL запросов
+          </div>}
         >
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-semibold mb-4">SQL Query Executor</h2>
-            <SqlQueryExecutor />
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Выполнение произвольных SQL запросов к базе данных. Будьте осторожны при использовании 
+              операторов изменения данных (INSERT, UPDATE, DELETE).
+            </p>
           </div>
+          <SqlQueryExecutor />
         </PermissionGate>
+      )}
 
-        {/* Role Management - protected by role_manage permission */}
+      {activeTab === 'roles' && (
         <PermissionGate 
           resource="roles" 
           action="manage"
-          fallback={<div>You don't have permission to manage roles.</div>}
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для управления ролями и разрешениями
+          </div>}
         >
-          <div className="bg-white shadow rounded-lg p-6">
-            <RoleManagement />
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Управление ролями пользователей и назначение разрешений. Здесь вы можете создавать 
+              новые роли, редактировать существующие и назначать им разрешения.
+            </p>
           </div>
+          <RoleManagement />
         </PermissionGate>
-      </div>
+      )}
     </div>
   );
 }

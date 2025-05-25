@@ -21,7 +21,7 @@ export const addVehicle = async (data: VehicleData): Promise<Vehicle> => {
 };
 
 export const getVehicleByLicensePlate = async (licensePlate: string): Promise<Vehicle> => {
-  const response = await api.get<Vehicle>(`/vehicles/by-license-plate/${licensePlate}`);
+  const response = await api.get<Vehicle>(`/vehicles//${licensePlate}`);
   return response.data;
 };
 

@@ -19,7 +19,7 @@ export const addOwner = async (data: OwnerData): Promise<Owner> => {
 };
 
 export const getOwnerByLicenseNumber = async (licenseNumber: string) => {
-  const response = await api.get('/owner-by-license', { 
+  const response = await api.get('/vehicles/owner-by-license', { 
     params: { licenseNumber } 
   });
   return response.data;

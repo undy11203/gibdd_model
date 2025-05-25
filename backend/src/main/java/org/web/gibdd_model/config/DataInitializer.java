@@ -2,11 +2,18 @@ package org.web.gibdd_model.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
 import org.web.gibdd_model.model.*;
 import org.web.gibdd_model.repository.*;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,6 +25,7 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public void run(String... args) {
@@ -29,6 +37,26 @@ public class DataInitializer implements CommandLineRunner {
         
         // Initialize users
         initializeUsers(roles);
+        
+        // Initialize database triggers
+        initializeTriggers();
+    }
+    
+    private void initializeTriggers() {
+        try {
+            // Load SQL triggers from file
+            ClassPathResource resource = new ClassPathResource("triggers.sql");
+            Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+            String sql = FileCopyUtils.copyToString(reader);
+            
+            // Execute SQL triggers
+            jdbcTemplate.execute(sql);
+            
+            System.out.println("Database triggers initialized successfully");
+        } catch (IOException e) {
+            System.err.println("Error initializing database triggers: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private List<Permission> initializePermissions() {

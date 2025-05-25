@@ -7,7 +7,7 @@ import OwnerForm from '../../components/forms/OwnerForm';
 import OwnerInfoByLicensePlate from '../../components/pro_search/OwnerInfoByLicensePlate';
 
 const tabs = [
-  { id: 'search', label: 'Поиск владельца' },
+  { id: 'search', label: 'Поиск информации' },
   { id: 'register', label: 'Регистрация владельца' }
 ];
 
@@ -35,7 +35,7 @@ export default function OwnerPage() {
         <>
           <div className="mb-6">
             <p className="text-gray-600">
-              Поиск информации о владельце транспортного средства по государственному номеру.
+              Поиск информации о владельце и автомобиле по государственному номеру. Получение полного досье на автомобиль, включая номера двигателя, кузова и шасси, данные о ДТП и техосмотре.
             </p>
           </div>
           <OwnerInfoByLicensePlate />

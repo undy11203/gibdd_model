@@ -10,8 +10,10 @@ import {
   getBrands,
   getAlarmSystems,
   validateLicensePlate,
+  getVehicleTypeValues,
 } from "@/utils/api";
 import SuggestionInput from "../input/SuggestionInput"; // Импортируем компонент
+// Removed: import { VehicleType } from "@/types/vehicles"; as it's no longer an enum
 
 interface VehicleFormData {
   brandId: number | null;
@@ -67,7 +69,7 @@ const AddVehicleForm = () => {
       chassisNumber: "",
       bodyNumber: "",
       color: "",
-      vehicleType: "",
+      vehicleType: "", // Default to empty string
     },
   });
 
@@ -76,6 +78,8 @@ const AddVehicleForm = () => {
   }>({
     isValid: null,
   });
+
+  const [vehicleTypes, setVehicleTypes] = useState<string[]>([""]); // Added
 
   const [displayValues, setDisplayValues] = useState({
     brandName: "",
@@ -109,6 +113,18 @@ const AddVehicleForm = () => {
         break;
     }
   };
+
+  useEffect(() => {
+    const fetchEnums = async () => {
+      try {
+        const types = await getVehicleTypeValues();
+        setVehicleTypes(types);
+      } catch (error) {
+        console.error("Error fetching vehicle enums", error);
+      }
+    };
+    fetchEnums();
+  }, []);
 
   const validateLicensePlateNumber = async (licenseNumber: string) => {
     if (!licenseNumber) {
@@ -151,8 +167,7 @@ const AddVehicleForm = () => {
     if (
       !data.brandId ||
       !data.alarmSystemId ||
-      !data.ownerId ||
-      !data.organizationId ||
+      !(data.ownerId || data.organizationId) ||
       !data.licensePlateId ||
       !data.releaseDate ||
       !data.engineVolume ||
@@ -334,11 +349,11 @@ const AddVehicleForm = () => {
           className="border p-2 w-full"
         >
           <option value="">Тип ТС</option>
-          <option value="PASSENGER">Легковой</option>
-          <option value="TRUCK">Грузовой</option>
-          <option value="MOTORCYCLE">Мотоцикл</option>
-          <option value="BUS">Автобус</option>
-          <option value="TRAILER">Прицеп</option>
+          {vehicleTypes.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
         </select>
 
         {/* Кнопка отправки */}

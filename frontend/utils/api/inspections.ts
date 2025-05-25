@@ -22,7 +22,7 @@ export const addInspection = async (data: InspectionData): Promise<TechnicalInsp
 };
 
 export const getOverdueInspections = async (): Promise<OverdueInspectionInfo[]> => {
-  const response = await api.get<OverdueInspectionInfo[]>('/inspection/overdue');
+  const response = await api.get<OverdueInspectionInfo[]>('/owners/overdue-inspections');
   return response.data;
 };
 

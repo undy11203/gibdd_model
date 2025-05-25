@@ -13,4 +13,18 @@ public enum TheftPopularity {
     private TheftPopularity(String description) {
         this.description = description;
     }
+
+//    @Override
+//    public String toString() {
+//        return description;
+//    }
+
+    public static TheftPopularity fromDescription(String description) {
+        for (TheftPopularity e : TheftPopularity.values()) {
+            if (e.description.equals(description)) {
+                return e;
+            }
+        }
+        return null;
+    }
 }

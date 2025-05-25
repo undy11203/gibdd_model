@@ -1,21 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import { useForm, useFieldArray } from 'react-hook-form';
-import { AccidentData, AccidentType, AccidentRole } from '@/types';
-import { addAccident, getVehicleByLicensePlate } from '../../utils/api';
+import { AccidentData } from '@/types'; // Removed AccidentType, AccidentRole
+import { addAccident, getVehicleByLicensePlate, getAccidentTypes, getAccidentRoles } from '../../utils/api'; // Added getAccidentTypes, getAccidentRoles
 import YandexLocationPicker from '../../components/YandexLocationPicker';
 
 interface ParticipantData {
   licensePlate: string;
-  role: AccidentRole;
+  role: string; // Was AccidentRole
 }
 
 interface AccidentFormData {
   date: string;
   latitude: string;
   longitude: string;
-  type: AccidentType;
+  type: string; // Was AccidentType
   description: string;
   victimsCount: string;
   damageAmount: string;
@@ -24,25 +24,15 @@ interface AccidentFormData {
   participants: ParticipantData[];
 }
 
-const accidentTypeLabels: Record<AccidentType, string> = {
-  [AccidentType.COLLISION]: 'Столкновение',
-  [AccidentType.OVERTURNING]: 'Опрокидывание',
-  [AccidentType.HIT_AND_RUN]: 'Наезд и скрытие',
-  [AccidentType.PEDESTRIAN_HIT]: 'Наезд на пешехода',
-  [AccidentType.OTHER]: 'Прочие'
-};
-
-const accidentRoleLabels: Record<AccidentRole, string> = {
-  [AccidentRole.CULPRIT]: 'Виновник',
-  [AccidentRole.VICTIM]: 'Потерпевший',
-  [AccidentRole.WITNESS]: 'Свидетель'
-};
+// accidentTypeLabels and accidentRoleLabels are removed as options are now dynamically populated.
 
 const AddAccidentForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [accidentTypeOptions, setAccidentTypeOptions] = useState<string[]>([]); // Added
+  const [accidentRoleOptions, setAccidentRoleOptions] = useState<string[]>([]); // Added
 
   const {
     register,
@@ -56,13 +46,13 @@ const AddAccidentForm = () => {
       date: '',
       latitude: '',
       longitude: '',
-      type: AccidentType.COLLISION,
+      type: '', // Was AccidentType.COLLISION, now string
       description: '',
       victimsCount: '',
       damageAmount: '',
       cause: '',
       roadConditions: '',
-      participants: [{ licensePlate: '', role: AccidentRole.CULPRIT }]
+      participants: [{ licensePlate: '', role: '' }] // Was AccidentRole.CULPRIT, now string
     }
   });
 
@@ -70,6 +60,20 @@ const AddAccidentForm = () => {
     control,
     name: 'participants'
   });
+
+  useEffect(() => {
+    const fetchEnums = async () => {
+      try {
+        const types = await getAccidentTypes();
+        setAccidentTypeOptions(types);
+        const roles = await getAccidentRoles();
+        setAccidentRoleOptions(roles);
+      } catch (err) {
+        console.error("Error fetching accident enums", err);
+      }
+    };
+    fetchEnums();
+  }, []);
 
   const onSubmit = async (data: AccidentFormData) => {
     try {
@@ -135,9 +139,10 @@ const AddAccidentForm = () => {
             {...register('type', { required: 'Обязательное поле' })}
             className="w-full p-2 border rounded"
           >
-            {Object.entries(accidentTypeLabels).map(([type, label]) => (
+            <option value="">Выберите тип ДТП</option>
+            {accidentTypeOptions.map((type) => (
               <option key={type} value={type}>
-                {label}
+                {type}
               </option>
             ))}
           </select>
@@ -233,7 +238,7 @@ const AddAccidentForm = () => {
           <h3 className="text-lg font-medium">Участники ДТП</h3>
           <button
             type="button"
-            onClick={() => append({ licensePlate: '', role: AccidentRole.VICTIM })}
+            onClick={() => append({ licensePlate: '', role: '' })} // Default role to empty string
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
             Добавить участника
@@ -261,9 +266,10 @@ const AddAccidentForm = () => {
                 })}
                 className="w-full p-2 border rounded"
               >
-                {Object.entries(accidentRoleLabels).map(([role, label]) => (
+                <option value="">Выберите роль</option>
+                {accidentRoleOptions.map((role) => (
                   <option key={role} value={role}>
-                    {label}
+                    {role}
                   </option>
                 ))}
               </select>

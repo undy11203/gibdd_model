@@ -45,36 +45,49 @@ public class LicensePlateService {
         } catch (NumberFormatException e) {
             return false;
         }
-        var freeRangeOpt = freeLicensePlateRangeRepository.findById(series);
-        if (freeRangeOpt.isEmpty()) {
+        
+        // Get all ranges for this series
+        var freeRanges = freeLicensePlateRangeRepository.findBySeries(series);
+        if (freeRanges.isEmpty()) {
             return false;
         }
-        var freeRange = freeRangeOpt.get();
-        return number >= freeRange.getStartNumber() && number <= freeRange.getEndNumber();
+        
+        // Check if the number is in any of the ranges
+        for (FreeLicensePlateRange freeRange : freeRanges) {
+            if (number >= freeRange.getStartNumber() && number <= freeRange.getEndNumber()) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     // Создание номера из свободных диапазонов
     public LicensePlate createLicensePlate(String series) {
-        Optional<FreeLicensePlateRange> freeRangeOpt = freeLicensePlateRangeRepository.findById(series);
-        if (freeRangeOpt.isEmpty()) {
+        // Get all ranges for this series
+        var freeRanges = freeLicensePlateRangeRepository.findBySeries(series);
+        if (freeRanges.isEmpty()) {
             return null;
         }
-        FreeLicensePlateRange freeRange = freeRangeOpt.get();
-
-        for (int num = freeRange.getStartNumber(); num <= freeRange.getEndNumber(); num++) {
-            String licenseNumber = buildLicenseNumber(num, series);
-            Optional<LicensePlate> existingPlate = licensePlateRepository.findById(licenseNumber);
-            if (existingPlate.isEmpty() || (existingPlate.isPresent() && existingPlate.get().getStatus())) {
-                LicensePlate plate = existingPlate.orElse(new LicensePlate());
-                plate.setLicenseNumber(licenseNumber);
-                plate.setSeries(series);
-                plate.setNumber(num);
-                plate.setStatus(false);
-                plate.setDate(LocalDate.now());
-                licensePlateRepository.save(plate);
-                return plate;
+        
+        // Try each range until we find an available number
+        for (FreeLicensePlateRange freeRange : freeRanges) {
+            for (int num = freeRange.getStartNumber(); num <= freeRange.getEndNumber(); num++) {
+                String licenseNumber = buildLicenseNumber(num, series);
+                Optional<LicensePlate> existingPlate = licensePlateRepository.findById(licenseNumber);
+                if (existingPlate.isEmpty() || (existingPlate.isPresent() && existingPlate.get().getStatus())) {
+                    LicensePlate plate = existingPlate.orElse(new LicensePlate());
+                    plate.setLicenseNumber(licenseNumber);
+                    plate.setSeries(series);
+                    plate.setNumber(num);
+                    plate.setStatus(false);
+                    plate.setDate(LocalDate.now());
+                    licensePlateRepository.save(plate);
+                    return plate;
+                }
             }
         }
+        
         return null;
     }
 

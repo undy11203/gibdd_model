@@ -5,10 +5,12 @@ import TabNav from '../../components/common/TabNav';
 import AddVehicleForm from '../../components/forms/AddVehicleForm';
 import { getVehicles } from '../../utils/api/vehicles';
 import { Vehicle } from '../../types/vehicles';
+import CRUDBrand from '@/components/CRUDBrand';
+import CRUDAlarmSystem from '@/components/CRUDAlarmSystem';
 
 export default function Vehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [activeTab, setActiveTab] = useState<'list' | 'register'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'register' | 'brand' | 'alarm-system'>('list');
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -24,7 +26,9 @@ export default function Vehicles() {
 
   const tabs = [
     { id: 'list', label: 'Список' },
-    { id: 'register', label: 'Регистрация' }
+    { id: 'register', label: 'Регистрация' },
+    { id: 'brand', label: 'Марки машин'},
+    { id: 'alarm-system', label: 'Сигнализации'}
   ];
 
   return (
@@ -69,8 +73,19 @@ export default function Vehicles() {
 
       {activeTab === 'register' && (
         <>
-          <h2 className="text-xl font-semibold mb-2">Регистрация транспортного средства</h2>
           <AddVehicleForm />
+        </>
+      )}
+
+      {activeTab === 'brand' && (
+        <>
+          <CRUDBrand />
+        </>
+      )}
+
+      {activeTab === 'alarm-system' && (
+        <>
+          <CRUDAlarmSystem />
         </>
       )}
     </div>

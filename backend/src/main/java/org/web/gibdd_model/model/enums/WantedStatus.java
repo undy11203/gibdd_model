@@ -13,4 +13,18 @@ public enum WantedStatus {
     private WantedStatus(String description) {
         this.description = description;
     }
+
+//    @Override
+//    public String toString() {
+//        return description;
+//    }
+
+    public static WantedStatus fromDescription(String description) {
+        for (WantedStatus e : WantedStatus.values()) {
+            if (e.description.equals(description)) {
+                return e;
+            }
+        }
+        return null;
+    }
 }

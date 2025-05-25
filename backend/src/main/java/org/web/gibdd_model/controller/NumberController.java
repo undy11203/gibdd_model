@@ -3,10 +3,16 @@ package org.web.gibdd_model.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.web.gibdd_model.model.FreeLicensePlateRange;
+import org.web.gibdd_model.model.FreeLicensePlateRangePK;
 import org.web.gibdd_model.model.LicensePlate;
+import org.web.gibdd_model.repository.FreeLicensePlateRangeRepository;
 import org.web.gibdd_model.service.LicensePlateService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/license-plates")
@@ -14,13 +20,16 @@ public class NumberController {
 
     @Autowired
     private LicensePlateService licensePlateService;
+    
+    @Autowired
+    private FreeLicensePlateRangeRepository freeLicensePlateRangeRepository;
 
     @GetMapping("/validate/{licenseNumber}")
     public ResponseEntity<Object> validateLicensePlate(@PathVariable String licenseNumber) {
         boolean isValid = licensePlateService.validateLicensePlateFormat(licenseNumber);
         
         // Create a response object with isValid flag
-        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("isValid", isValid);
         
         if (!isValid) {
@@ -41,7 +50,94 @@ public class NumberController {
 
     @GetMapping("/hot")
     public ResponseEntity<List<LicensePlate>> getHotLicensePlates() {
-        java.util.List<org.web.gibdd_model.model.LicensePlate> hotPlates = licensePlateService.getHotLicensePlates();
+        List<LicensePlate> hotPlates = licensePlateService.getHotLicensePlates();
         return ResponseEntity.ok(hotPlates);
+    }
+    
+    // CRUD operations for FreeLicensePlateRange
+    
+    @GetMapping("/ranges")
+    public ResponseEntity<List<FreeLicensePlateRange>> getAllRanges() {
+        return ResponseEntity.ok(freeLicensePlateRangeRepository.findAll());
+    }
+    
+    @GetMapping("/ranges/series/{series}")
+    public ResponseEntity<List<FreeLicensePlateRange>> getRangesBySeries(@PathVariable String series) {
+        List<FreeLicensePlateRange> ranges = freeLicensePlateRangeRepository.findBySeries(series);
+        if (ranges.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(ranges);
+    }
+    
+    @PostMapping("/ranges")
+    public ResponseEntity<FreeLicensePlateRange> createRange(@RequestBody Map<String, Object> requestBody) {
+        // Extract and validate the fields
+        String series = (String) requestBody.get("series");
+        Integer startNumber = (Integer) requestBody.get("startNumber");
+        Integer endNumber = (Integer) requestBody.get("endNumber");
+        
+        if (series == null || startNumber == null || endNumber == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        if (startNumber > endNumber) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        // Create the composite key and entity
+        FreeLicensePlateRangePK id = new FreeLicensePlateRangePK(series, startNumber, endNumber);
+        
+        // Check if a range with the same composite key already exists
+        if (freeLicensePlateRangeRepository.existsById(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        // Create a new entity using the factory method
+        FreeLicensePlateRange range = FreeLicensePlateRange.create(series, startNumber, endNumber);
+        FreeLicensePlateRange savedRange = freeLicensePlateRangeRepository.save(range);
+        return ResponseEntity.ok(savedRange);
+    }
+    
+    @PutMapping("/ranges")
+    public ResponseEntity<FreeLicensePlateRange> updateRange(@RequestBody Map<String, Object> requestBody) {
+        // Extract and validate the fields
+        String series = (String) requestBody.get("series");
+        Integer startNumber = (Integer) requestBody.get("startNumber");
+        Integer endNumber = (Integer) requestBody.get("endNumber");
+        
+        if (series == null || startNumber == null || endNumber == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        if (startNumber > endNumber) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        // Create the composite key
+        FreeLicensePlateRangePK id = new FreeLicensePlateRangePK(series, startNumber, endNumber);
+        
+        // Check if the range exists
+        if (!freeLicensePlateRangeRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        // Create a new entity using the factory method
+        FreeLicensePlateRange range = FreeLicensePlateRange.create(series, startNumber, endNumber);
+        FreeLicensePlateRange updatedRange = freeLicensePlateRangeRepository.save(range);
+        return ResponseEntity.ok(updatedRange);
+    }
+    
+    @DeleteMapping("/ranges")
+    public ResponseEntity<Void> deleteRange(@RequestParam String series, 
+                                           @RequestParam Integer startNumber, 
+                                           @RequestParam Integer endNumber) {
+        FreeLicensePlateRangePK id = new FreeLicensePlateRangePK(series, startNumber, endNumber);
+        if (!freeLicensePlateRangeRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        freeLicensePlateRangeRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }

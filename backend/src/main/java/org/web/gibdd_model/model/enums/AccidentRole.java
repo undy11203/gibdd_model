@@ -13,4 +13,18 @@ public enum AccidentRole {
     private AccidentRole(String description) {
         this.description = description;
     }
+
+//    @Override
+//    public String toString() {
+//        return description;
+//    }
+
+    public static AccidentRole fromDescription(String description) {
+        for (AccidentRole e : AccidentRole.values()) {
+            if (e.description.equals(description)) {
+                return e;
+            }
+        }
+        return null;
+    }
 }

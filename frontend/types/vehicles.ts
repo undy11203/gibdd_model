@@ -1,6 +1,9 @@
 import { Owner } from './owners';
 import { Organization } from './organizations';
 import { LicensePlate } from './license-plates';
+import { AccidentInfoDTO } from './accidents'; // Import AccidentInfoDTO
+import { Brand } from './brand';
+import { AlarmSystem } from './alarm-systems';
 
 export interface Vehicle {
   id: number;
@@ -11,11 +14,11 @@ export interface Vehicle {
   chassisNumber: string;
   bodyNumber: string;
   color: string;
-  vehicleType: VehicleType;
+  vehicleType: string; // Was VehicleType
   licensePlate: LicensePlate;
   owner: Owner;
   organization: Organization;
-  alarmSystem: AlarmSystem;
+  alarmSystem: AlarmSystem; // This AlarmSystem is defined below
 }
 
 export interface VehicleData {
@@ -34,34 +37,18 @@ export interface VehicleData {
   vehicleType: string;
 }
 
-export interface Brand {
-  id: number;
-  name: string;
-  theftPopularity: TheftPopularity;
-}
+//Remove Brand
+//Remove AlarmSystem
 
-export interface AlarmSystem {
-  id: number;
-  name: string;
-  reliability: Reliability;
-}
+// Removed VehicleType enum
+// Removed Reliability enum
+// Removed TheftPopularity enum
 
-export enum VehicleType {
-  PASSENGER = 'PASSENGER',
-  TRUCK = 'TRUCK',
-  MOTORCYCLE = 'MOTORCYCLE',
-  BUS = 'BUS',
-  TRAILER = 'TRAILER'
-}
-
-export enum Reliability {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH'
-}
-
-export enum TheftPopularity {
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW'
+export interface VehicleDossierDTO {
+  engineNumber: string;
+  chassisNumber: string;
+  bodyNumber: string;
+  inAccident: boolean;
+  passedInspection: boolean;
+  accidents: AccidentInfoDTO[];
 }

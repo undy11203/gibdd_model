@@ -6,6 +6,7 @@ import {
   AccidentStatisticsParams,
   AccidentAnalysis,
   DrunkDrivingStats
+  // Removed AccidentType, AccidentRole as they are no longer exported from types
 } from '../../types/accidents';
 
 export const getAccidents = async (): Promise<Accident[]> => {
@@ -37,4 +38,14 @@ export const addAccidentParticipant = async (accidentId: number, data: {
   role: string;
 }): Promise<void> => {
   await api.post(`/accidents/${accidentId}/participants`, data);
+};
+
+export const getAccidentTypes = async (): Promise<string[]> => {
+  const response = await api.get<string[]>('/accidents/accident-types');
+  return response.data;
+};
+
+export const getAccidentRoles = async (): Promise<string[]> => {
+  const response = await api.get<string[]>('/accidents/accident-roles');
+  return response.data;
 };

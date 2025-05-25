@@ -8,11 +8,10 @@ import OrganizationNumberFilter from '../../components/pro_search/OrganizationNu
 
 const tabs = [
   { id: 'list', label: 'Список организаций' },
-  { id: 'filter', label: 'Поиск по номерам' }
 ];
 
 export default function OrganizationsPage() {
-  const [activeTab, setActiveTab] = useState<'list' | 'filter'>('list');
+  const [activeTab, setActiveTab] = useState<'list'>('list');
 
   return (
     <div className="container mx-auto p-4">
@@ -34,12 +33,6 @@ export default function OrganizationsPage() {
       {activeTab === 'list' && (
         <>
           <OrganizationsDisplay />
-        </>
-      )}
-
-      {activeTab === 'filter' && (
-        <>
-          <OrganizationNumberFilter />
         </>
       )}
     </div>

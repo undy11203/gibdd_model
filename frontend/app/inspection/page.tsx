@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AddTechnicalInspectionForm from '../../components/forms/AddTechnicalInspectionForm';
 import TabNav from '../../components/common/TabNav';
+import OwnersWithOverdueInspection from '@/components/pro_search/OwnersWithOverdueInspection';
 // import { TechnicalInspection } from "'types"' (see below for file content)
 // import { getInspections } from ''utils/api'' (see below for file content);
 
@@ -26,8 +27,8 @@ export default function InspectionPage() {
   }, []);
 
   const tabs = [
-    { id: 'list', label: 'List' },
-    { id: 'add', label: 'Add' },
+    { id: 'list', label: 'Список владельцев просрочивших техосмотр' },
+    { id: 'add', label: 'Зарегистировать техосмотр' },
   ];
 
   const handleTabChange = (tabId: string) => {
@@ -66,6 +67,7 @@ export default function InspectionPage() {
               </li>
             ))}
           </ul>
+          <OwnersWithOverdueInspection />
         </>
       )}
 

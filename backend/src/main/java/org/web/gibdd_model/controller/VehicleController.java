@@ -6,7 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.web.gibdd_model.dto.VehicleDTO;
 import org.web.gibdd_model.model.Vehicle;
+import org.web.gibdd_model.model.enums.VehicleType;
 import org.web.gibdd_model.repository.VehicleRepository;
 import org.web.gibdd_model.model.Brand;
 import org.web.gibdd_model.model.Owner;
@@ -101,23 +103,23 @@ public class VehicleController {
     private FreeLicensePlateRangeRepository freeLicensePlateRangeRepository;
 
     @PostMapping
-    public ResponseEntity<Vehicle> createVehicle(@RequestBody Vehicle vehicle) {
+    public ResponseEntity<Vehicle> createVehicle(@RequestBody VehicleDTO vehicleDTO) {
         // If the vehicle has a license plate number string but no actual license plate object
-        if (vehicle.getLicensePlate() == null || vehicle.getLicensePlate().getLicenseNumber() == null) {
+        if (vehicleDTO.getLicenseNumber() == null) {
             return ResponseEntity.badRequest().build();
         }
-        
-        String licenseNumber = vehicle.getLicensePlate().getLicenseNumber();
-        
+
+        String licenseNumber = vehicleDTO.getLicenseNumber();
+
         // Check if the license plate is valid and available
         if (!licensePlateService.validateLicensePlateFormat(licenseNumber)) {
             return ResponseEntity.badRequest().build();
         }
-        
+
         // Extract the series from the license number (first letter + last two letters)
         String series = licenseNumber.substring(0, 1) + licenseNumber.substring(4, 6);
         int number = Integer.parseInt(licenseNumber.substring(1, 4));
-        
+
         // Create or update the license plate
         LicensePlate licensePlate = licensePlateRepository.findById(licenseNumber)
                 .orElseGet(() -> {
@@ -129,56 +131,87 @@ public class VehicleController {
                     newPlate.setDate(java.time.LocalDate.now());
                     return licensePlateRepository.save(newPlate);
                 });
-        
+
         // If the plate exists but is already in use
-        if (licensePlate.getStatus() != null && !licensePlate.getStatus()) {
+        Boolean state = licensePlate.getStatus();
+        if (licensePlate.getStatus() != null && state) {
             return ResponseEntity.badRequest().build();
         }
-        
+
         // Mark the plate as used
         licensePlate.setStatus(false);
         licensePlateRepository.save(licensePlate);
-        
+
         // Update the free license plate range if needed
         updateFreeLicensePlateRange(series, number);
-        
-        // Set the license plate to the vehicle
+
+        // Create a new Vehicle object from VehicleDTO
+        Vehicle vehicle = new Vehicle();
+        vehicle.setAlarmSystem(alarmSystemRepository.findById(vehicleDTO.getAlarmSystemId()).orElse(null));
+        vehicle.setBodyNumber(vehicleDTO.getBodyNumber());
+        vehicle.setBrand(brandRepository.findById((long) vehicleDTO.getBrandId()).orElse(null));
+        vehicle.setChassisNumber(vehicleDTO.getChassisNumber());
+        vehicle.setColor(vehicleDTO.getColor());
+        vehicle.setEngineNumber(vehicleDTO.getEngineNumber());
+        vehicle.setEngineVolume(Float.valueOf(vehicleDTO.getEngineVolume()));
         vehicle.setLicensePlate(licensePlate);
-        
+        vehicle.setOrganization(organizationRepository.findById((long) vehicleDTO.getOrganizationId()).orElse(null));
+        vehicle.setOwner(ownerRepository.findById((long) vehicleDTO.getOwnerId()).orElse(null));
+        vehicle.setReleaseDate(vehicleDTO.getReleaseDate().atStartOfDay());
+        vehicle.setVehicleType(VehicleType.fromDescription(vehicleDTO.getVehicleType()));
+
         // Save the vehicle
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
         return ResponseEntity.ok(savedVehicle);
     }
-    
-    /**
-     * Updates the free license plate range after allocating a number
-     * If the allocated number is at the start of the range, increment the start
-     * If the allocated number is at the end of the range, decrement the end
-     * If the allocated number is in the middle, split the range into two
-     */
+
     private void updateFreeLicensePlateRange(String series, int allocatedNumber) {
-        freeLicensePlateRangeRepository.findById(series).ifPresent(range -> {
+        freeLicensePlateRangeRepository.findById_Series(series).ifPresent(range -> {
             if (range.getStartNumber() == allocatedNumber) {
                 // If the allocated number is at the start of the range, increment the start
-                range.setStartNumber(allocatedNumber + 1);
-                freeLicensePlateRangeRepository.save(range);
+                // Create a new range with updated start number
+                FreeLicensePlateRange updatedRange = FreeLicensePlateRange.create(
+                    series, 
+                    allocatedNumber + 1, 
+                    range.getEndNumber()
+                );
+                
+                // Delete the old range and save the new one
+                freeLicensePlateRangeRepository.delete(range);
+                freeLicensePlateRangeRepository.save(updatedRange);
             } else if (range.getEndNumber() == allocatedNumber) {
                 // If the allocated number is at the end of the range, decrement the end
-                range.setEndNumber(allocatedNumber - 1);
-                freeLicensePlateRangeRepository.save(range);
+                // Create a new range with updated end number
+                FreeLicensePlateRange updatedRange = FreeLicensePlateRange.create(
+                    series, 
+                    range.getStartNumber(), 
+                    allocatedNumber - 1
+                );
+                
+                // Delete the old range and save the new one
+                freeLicensePlateRangeRepository.delete(range);
+                freeLicensePlateRangeRepository.save(updatedRange);
             } else if (allocatedNumber > range.getStartNumber() && allocatedNumber < range.getEndNumber()) {
-                // If the allocated number is in the middle, split the range into two
-                FreeLicensePlateRange newRange = new FreeLicensePlateRange();
-                newRange.setSeries(series);
-                newRange.setStartNumber(allocatedNumber + 1);
-                newRange.setEndNumber(range.getEndNumber());
+                // If the allocated number is in the middle of the range, split it into two ranges
                 
-                // Update the original range
-                range.setEndNumber(allocatedNumber - 1);
+                // Create first range (from original start to just before allocated number)
+                FreeLicensePlateRange firstRange = FreeLicensePlateRange.create(
+                    series, 
+                    range.getStartNumber(), 
+                    allocatedNumber - 1
+                );
                 
-                // Save both ranges
-                freeLicensePlateRangeRepository.save(range);
-                freeLicensePlateRangeRepository.save(newRange);
+                // Create second range (from just after allocated number to original end)
+                FreeLicensePlateRange secondRange = FreeLicensePlateRange.create(
+                    series, 
+                    allocatedNumber + 1, 
+                    range.getEndNumber()
+                );
+                
+                // Delete the original range and save the two new ranges
+                freeLicensePlateRangeRepository.delete(range);
+                freeLicensePlateRangeRepository.save(firstRange);
+                freeLicensePlateRangeRepository.save(secondRange);
             }
         });
     }

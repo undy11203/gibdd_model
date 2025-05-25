@@ -15,8 +15,6 @@ const OrganizationsDisplay = () => {
 
   // Filter states
   const [series, setSeries] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
 
   const fetchOrganizations = async () => {
     try {
@@ -24,11 +22,9 @@ const OrganizationsDisplay = () => {
       setError(null);
 
       let response;
-      if (series || (startDate && endDate)) {
+      if (series) {
         response = await getOrganizationsByNumberFilter({
-          series: series || undefined,
-          startDate: startDate || undefined,
-          endDate: endDate || undefined
+          series: series || undefined
         });
       } else {
         response = await getOrganizations({ page, limit: 10 });
@@ -47,7 +43,7 @@ const OrganizationsDisplay = () => {
 
   useEffect(() => {
     fetchOrganizations();
-  }, [page, series, startDate, endDate]);
+  }, [page, series]);
 
   const handleFilter = () => {
     setPage(0);
@@ -56,8 +52,6 @@ const OrganizationsDisplay = () => {
 
   const clearFilters = () => {
     setSeries('');
-    setStartDate('');
-    setEndDate('');
     setPage(0);
   };
 
@@ -87,29 +81,7 @@ const OrganizationsDisplay = () => {
               placeholder="Например: A"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Дата начала
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Дата окончания
-            </label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div className="flex items-end gap-2">
+          <div className="flex items-end justify-end gap-2 md:col-span-1">
             <button
               onClick={handleFilter}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

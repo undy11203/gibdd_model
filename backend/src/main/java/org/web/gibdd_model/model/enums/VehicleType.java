@@ -15,4 +15,18 @@ public enum VehicleType {
     VehicleType(String description) {
         this.description = description;
     }
+
+//    @Override
+//    public String toString() {
+//        return description;
+//    }
+
+    public static VehicleType fromDescription(String description) {
+        for (VehicleType e : VehicleType.values()) {
+            if (e.description.equals(description)) {
+                return e;
+            }
+        }
+        return null;
+    }
 }

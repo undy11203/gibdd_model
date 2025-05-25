@@ -1,5 +1,6 @@
 import api from './client';
-import { Vehicle, VehicleData, Brand } from '../../types/vehicles';
+import { Brand } from "../../types/brand";
+import { Vehicle, VehicleData, VehicleDossierDTO } from '../../types/vehicles'; // Added VehicleDossierDTO
 import { PageResponse } from '../../types/common';
 
 interface VehicleQueryParams {
@@ -24,18 +25,14 @@ export const getVehicleByLicensePlate = async (licensePlate: string): Promise<Ve
   return response.data;
 };
 
-export const getVehicleDossierByLicensePlate = async (licenseNumber: string) => {
-  const response = await api.get(`/vehicles/dossier-by-license`, { 
+export const getVehicleDossierByLicensePlate = async (licenseNumber: string): Promise<VehicleDossierDTO> => {
+  const response = await api.get<VehicleDossierDTO>(`/vehicles/dossier-by-license`, { 
     params: { licenseNumber } 
   });
   return response.data;
 };
 
-export const getBrands = async (params: { 
-  search?: string; 
-  page?: number; 
-  limit?: number 
-}): Promise<PageResponse<Brand>> => {
-  const response = await api.get<PageResponse<Brand>>('/brands', { params });
-  return response.data;
+export const getVehicleTypeValues = async (): Promise<string[]> => {
+  const response = await api.get<string[]>('/vehicles/vehicle-types'); // Expects string[][]
+  return response.data && response.data.length > 0 ? response.data : []; // Return first element
 };

@@ -5,7 +5,7 @@ export interface Accident {
   id: number;
   date: string;
   location: Location;
-  type: AccidentType;
+  type: string; // Was AccidentType
   description: string;
   victimsCount: number;
   damageAmount: number;
@@ -17,7 +17,7 @@ export interface AccidentParticipant {
   id: number;
   accident: Accident;
   vehicle: Vehicle;
-  role: AccidentRole;
+  role: string; // Was AccidentRole
 }
 
 export interface AccidentData {
@@ -75,16 +75,17 @@ export interface DrunkDrivingStats {
   totalVictims: number;
 }
 
-export enum AccidentType {
-  COLLISION = 'COLLISION',
-  OVERTURNING = 'OVERTURNING',
-  HIT_AND_RUN = 'HIT_AND_RUN',
-  PEDESTRIAN_HIT = 'PEDESTRIAN_HIT',
-  OTHER = 'OTHER'
-}
+// Removed AccidentType enum
+// Removed AccidentRole enum
 
-export enum AccidentRole {
-  CULPRIT = 'CULPRIT',
-  VICTIM = 'VICTIM',
-  WITNESS = 'WITNESS'
+export interface AccidentInfoDTO {
+  id: number;
+  date: string; // Assuming LocalDate becomes string
+  type: string; // Assuming AccidentType enum becomes string (key or description)
+  description: string;
+  victimsCount: number;
+  damageAmount: number;
+  cause: string;
+  roadConditions: string;
+  role: string; // Assuming AccidentRole enum becomes string (key or description)
 }

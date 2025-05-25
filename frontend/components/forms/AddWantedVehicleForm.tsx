@@ -1,16 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react"; // Added useState, useEffect
 import { useForm, useWatch } from "react-hook-form";
 import SuggestionInput from "../input/SuggestionInput"; // Импортируем компонент
-import { addWanted, getOwners, getVehicles } from "../../utils/api";
-import { WantedReason, WantedStatus } from "../../types/wanted";
+import { addWanted, getOwners, getVehicles, getWantedStatusValues } from "../../utils/api"; // Added getWantedStatusValues
+// Removed WantedReason, WantedStatus imports
 
 interface WantedFormData {
   vehicleId: number | null;
   addedDate: string;
-  reason: WantedReason;
-  status: WantedStatus;
+  reason: string; // Was WantedReason
+  status: string; // Was WantedStatus
   ownerName: string;
   ownerId: number | null;
 }
@@ -27,8 +27,8 @@ const AddWantedForm = () => {
     defaultValues: {
       vehicleId: null,
       addedDate: "",
-      reason: WantedReason.THEFT,
-      status: WantedStatus.WANTED,
+      reason: "Угон", // Default to a common reason string, as enum is removed
+      status: "", // Default to empty, will be populated by fetched data
       ownerName: "",
       ownerId: null,
     },
@@ -36,6 +36,7 @@ const AddWantedForm = () => {
 
   const [vehicles, setVehicles] = React.useState<any[]>([]);
   const ownerId = useWatch({ control, name: "ownerId" });
+  const [wantedStatusOptions, setWantedStatusOptions] = useState<string[]>([]); // Added
 
   // Обновление списка транспортных средств при изменении владельца
   React.useEffect(() => {
@@ -54,6 +55,18 @@ const AddWantedForm = () => {
       setValue("vehicleId", null);
     }
   }, [ownerId, setValue]);
+
+  useEffect(() => {
+    const fetchStatusEnums = async () => {
+      try {
+        const statuses = await getWantedStatusValues();
+        setWantedStatusOptions(statuses);
+      } catch (error) {
+        console.error("Error fetching wanted statuses", error);
+      }
+    };
+    fetchStatusEnums();
+  }, []);
 
   // Обработчик выбора подсказки
   const onSuggestionSelect = (suggestion: { id: number; name: string }) => {
@@ -74,8 +87,8 @@ const AddWantedForm = () => {
       reset({
         vehicleId: null,
         addedDate: "",
-        reason: WantedReason.THEFT,
-        status: WantedStatus.WANTED,
+        reason: "Угон", // Replaced WantedReason.THEFT with string literal
+        status: "", // Replaced WantedStatus.WANTED, reset to empty or a default string
         ownerName: "",
         ownerId: null,
       });
@@ -141,8 +154,9 @@ const AddWantedForm = () => {
         {...register("reason", { required: "Это поле обязательно" })}
         className={`border p-2 w-full`}
       >
-        <option value={WantedReason.THEFT}>Угон</option>
-        <option value={WantedReason.HIT_AND_RUN}>Скрылся с места ДТП</option>
+        {/* Hardcoded string options as WantedReason enum is removed and not fetched */}
+        <option value="Угон">Угон</option>
+        <option value="Скрылся с места ДТП">Скрылся с места ДТП</option>
       </select>
 
       {/* Статус */}
@@ -153,8 +167,12 @@ const AddWantedForm = () => {
         {...register("status", { required: "Это поле обязательно" })}
         className={`border p-2 w-full`}
       >
-        <option value={WantedStatus.WANTED}>Розыскивается</option>
-        <option value={WantedStatus.FOUND}>Найден</option>
+        <option value="">Выберите статус</option>
+        {wantedStatusOptions.map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+        ))}
       </select>
 
       {/* Кнопка отправки */}

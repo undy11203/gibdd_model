@@ -1,26 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
 import { AccidentStatisticsDTO } from "@/types"
-import { getAccidentStatistics } from '@/utils/api';
-import { AccidentType } from '@/types';
+import { getAccidentStatistics, getAccidentTypes } from '@/utils/api'; // Added getAccidentTypes
+// Removed: import { AccidentType } from '@/types';
 
 //5. Получить статистику по любому типу ДТП за указанный период.
 const AccidentStatistics = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedType, setSelectedType] = useState<AccidentType | ''>('');
+  const [selectedType, setSelectedType] = useState<string>(''); // Was AccidentType | ''
   const [statistics, setStatistics] = useState<AccidentStatisticsDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [accidentTypeOptions, setAccidentTypeOptions] = useState<string[]>([]); // To store fetched descriptions
 
-  const accidentTypeLabels: Record<AccidentType, string> = {
-    [AccidentType.COLLISION]: 'Столкновение',
-    [AccidentType.OVERTURNING]: 'Опрокидывание',
-    [AccidentType.HIT_AND_RUN]: 'Наезд и скрытие',
-    [AccidentType.PEDESTRIAN_HIT]: 'Наезд на пешехода',
-    [AccidentType.OTHER]: 'Прочие'
-  };
+  // Removed accidentTypeKeyToDescriptionMap as the backend /api/accidents/statistics will accept descriptions.
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const types = await getAccidentTypes();
+        setAccidentTypeOptions(types);
+      } catch (err) {
+        console.error("Error fetching accident types for statistics filter", err);
+      }
+    };
+    fetchTypes();
+  }, []);
 
   const handleSearch = async () => {
     if (!startDate || !endDate) {
@@ -80,13 +87,13 @@ const AccidentStatistics = () => {
           </label>
           <select
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value as AccidentType | '')}
+            onChange={(e) => setSelectedType(e.target.value)}
             className="w-full p-2 border rounded"
           >
             <option value="">Все типы</option>
-            {Object.entries(accidentTypeLabels).map(([type, label]) => (
-              <option key={type} value={type}>
-                {label}
+            {accidentTypeOptions.map((typeDescription) => (
+              <option key={typeDescription} value={typeDescription}>
+                {typeDescription}
               </option>
             ))}
           </select>
@@ -121,7 +128,8 @@ const AccidentStatistics = () => {
             <tbody>
               {statistics.map((stat, index) => (
                 <tr key={index}>
-                  <td className="px-4 py-2 border">{accidentTypeLabels[stat.type as AccidentType] || stat.type}</td>
+                  {/* Assuming stat.type from backend DTO will now be the description, or displaying key is acceptable if not */}
+                  <td className="px-4 py-2 border">{stat.type}</td>
                   <td className="px-4 py-2 border text-center">{stat.count}</td>
                   <td className="px-4 py-2 border text-right">
                     {stat.averageDamage.toLocaleString('ru-RU', {

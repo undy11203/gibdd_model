@@ -70,8 +70,8 @@ public class AccidentController {
     public ResponseEntity<List<AccidentStatisticsDTO>> getAccidentStatistics(
             @RequestParam LocalDate startDate,
             @RequestParam LocalDate endDate,
-            @RequestParam(required = false) AccidentType type) {
-        List<AccidentStatisticsDTO> statistics = accidentService.getAccidentStatistics(startDate, endDate, type);
+            @RequestParam(required = false) String type) {
+        List<AccidentStatisticsDTO> statistics = accidentService.getAccidentStatistics(startDate, endDate, AccidentType.fromDescription(type));
         return ResponseEntity.ok(statistics);
     }
 

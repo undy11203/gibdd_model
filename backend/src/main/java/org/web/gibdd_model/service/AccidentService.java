@@ -124,9 +124,9 @@ public class AccidentService {
         if (startDate == null || endDate == null) {
             throw new IllegalArgumentException("Start date and end date must not be null");
         }
-        if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date must be before or equal to end date");
-        }
+//        if (endDate.isAfter(startDate)) {
+//            throw new IllegalArgumentException("Start date must be before or equal to end date");
+//        }
 
         List<Object[]> statistics;
         if (type != null) {

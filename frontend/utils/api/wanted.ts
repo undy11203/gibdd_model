@@ -4,6 +4,7 @@ import {
   WantedVehicleData, 
   WantedVehicleStats,
   WantedVehicleResponse
+  // Removed WantedStatus as it's no longer exported from types
 } from '../../types/wanted';
 
 interface WantedVehicleQueryParams {
@@ -52,4 +53,9 @@ export const markAsFound = async (id: number, foundDate: string): Promise<Wanted
     params: { foundDate } 
   });
   return response.data;
+};
+
+export const getWantedStatusValues = async (): Promise<string[]> => {
+  const response = await api.get<string[]>('/wanted/wanted-status');
+  return response.data && response.data.length > 0 ? response.data : [];
 };

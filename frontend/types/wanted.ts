@@ -14,8 +14,8 @@ export interface WantedVehicle {
   };
   addedDate: string;
   foundDate?: string;
-  reason: WantedReason;
-  status: WantedStatus;
+  reason: string; // Was WantedReason
+  status: string; // Was WantedStatus
   description: string;
 }
 
@@ -35,14 +35,7 @@ export interface WantedVehicleStats {
   averageSearchTime: number;
 }
 
-export enum WantedReason {
-  HIT_AND_RUN = 'HIT_AND_RUN',
-  THEFT = 'THEFT'
-}
-
-export enum WantedStatus {
-  WANTED = 'WANTED',
-  FOUND = 'FOUND'
-}
+// Removed WantedReason enum
+// Removed WantedStatus enum
 
 export type WantedVehicleResponse = PageResponse<WantedVehicle>;

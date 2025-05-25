@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getWantedVehicles, getWantedVehicleStats } from '../../utils/api/wanted';
-import { WantedVehicle, WantedVehicleStats, WantedReason, WantedStatus } from '../../types/wanted';
+import { WantedVehicle, WantedVehicleStats } from '../../types/wanted'; // Removed WantedReason, WantedStatus
 import { PageResponse } from '../../types/common';
 
 //8. Получить список машин, отданных в розыск, будь то скрывшиеся с места ДТП или угнанные.
@@ -16,7 +16,7 @@ const WantedVehiclesDisplay = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [selectedReason, setSelectedReason] = useState<WantedReason | ''>('');
+  const [selectedReason, setSelectedReason] = useState<string>(''); // Was WantedReason | ''
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -74,14 +74,15 @@ const WantedVehiclesDisplay = () => {
             <select
               value={selectedReason}
               onChange={(e) => {
-                setSelectedReason(e.target.value as WantedReason | '');
+                setSelectedReason(e.target.value); // e.target.value is already string
                 setPage(0);
               }}
               className="w-full p-2 border rounded"
             >
               <option value="">Все причины</option>
-              <option value={WantedReason.THEFT}>Угон</option>
-              <option value={WantedReason.HIT_AND_RUN}>Скрылся с места ДТП</option>
+              {/* Assuming backend expects keys for reason filter */}
+              <option value="THEFT">Угон</option>
+              <option value="HIT_AND_RUN">Скрылся с места ДТП</option>
             </select>
           </div>
           <div>
@@ -180,13 +181,15 @@ const WantedVehiclesDisplay = () => {
                 <td className="px-4 py-2">{vehicle.vehicle.brand?.name || 'Неизвестно'}</td>
                 <td className="px-4 py-2">{vehicle.vehicle.color || 'Неизвестно'}</td>
                 <td className="px-4 py-2">
-                  {vehicle.reason === WantedReason.HIT_AND_RUN ? 'Скрылся с места ДТП' : 'Угон'}
+                  {/* Assuming vehicle.reason from backend is a key like "THEFT" or "HIT_AND_RUN" */}
+                  {vehicle.reason === 'HIT_AND_RUN' ? 'Скрылся с места ДТП' : vehicle.reason === 'THEFT' ? 'Угон' : vehicle.reason}
                 </td>
                 <td className="px-4 py-2">
                   {new Date(vehicle.addedDate).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-2">
-                  {vehicle.status === WantedStatus.WANTED ? 'В розыске' : 'Найден'}
+                  {/* vehicle.status is now the description string e.g. "Розыскивается" */}
+                  {vehicle.status}
                 </td>
               </tr>
             ))}

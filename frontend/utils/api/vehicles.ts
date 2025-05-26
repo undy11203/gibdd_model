@@ -21,7 +21,7 @@ export const addVehicle = async (data: VehicleData): Promise<Vehicle> => {
 };
 
 export const getVehicleByLicensePlate = async (licensePlate: string): Promise<Vehicle> => {
-  const response = await api.get<Vehicle>(`/vehicles//${licensePlate}`);
+  const response = await api.get<Vehicle>(`/vehicles/by-license-plate/${licensePlate}`);
   return response.data;
 };
 
@@ -35,4 +35,8 @@ export const getVehicleDossierByLicensePlate = async (licenseNumber: string): Pr
 export const getVehicleTypeValues = async (): Promise<string[]> => {
   const response = await api.get<string[]>('/vehicles/vehicle-types'); // Expects string[][]
   return response.data && response.data.length > 0 ? response.data : []; // Return first element
+};
+
+export const deleteVehicle = async (id: number): Promise<void> => {
+  await api.delete(`/vehicles/${id}`);
 };

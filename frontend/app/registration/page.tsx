@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { register } from '../../utils/api/auth';
 import { RegisterRequest } from '../../types/auth';
 import { useAuth } from '../../contexts/AuthContext';
+import TabNav from '../../components/common/TabNav';
+import AddOrganizationForm from '../../components/forms/AddOrganizationForm';
 
 export default function Registration() {
   const [formData, setFormData] = useState<RegisterRequest>({
@@ -17,6 +19,12 @@ export default function Registration() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login: authLogin } = useAuth();
+  const [activeTab, setActiveTab] = useState<'user' | 'organization'>('user');
+
+  const tabs = [
+    { id: 'user', label: 'Регистрация пользователя' },
+    { id: 'organization', label: 'Создание организации' }
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -48,7 +56,16 @@ export default function Registration() {
             Регистрация
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+
+        <div className="mb-6">
+          <TabNav 
+            tabs={tabs} 
+            activeTab={activeTab} 
+            onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
+          />
+        </div>
+        {activeTab === 'user' && (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <input
@@ -100,9 +117,16 @@ export default function Registration() {
               {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
             </button>
           </div>
-        </form>
+          </form>
+        )}
 
-        <div className="text-sm text-center">
+        {activeTab === 'organization' && (
+          <div className="mt-8">
+            <AddOrganizationForm />
+          </div>
+        )}
+
+        <div className="text-sm text-center mt-6">
           <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
             Уже есть аккаунт? Войти
           </Link>

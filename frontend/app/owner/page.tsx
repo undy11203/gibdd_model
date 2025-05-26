@@ -5,15 +5,17 @@ import TabNav from '../../components/common/TabNav';
 import BackButton from '../../components/common/BackButton';
 import OwnerForm from '../../components/forms/OwnerForm';
 import OwnerInfoByLicensePlate from '../../components/pro_search/OwnerInfoByLicensePlate';
+import OwnersList from '../../components/pro_search/OwnersList';
 import { PermissionGate } from '../../components/common/PermissionGate';
 
 const tabs = [
   { id: 'search', label: 'Поиск информации' },
-  { id: 'register', label: 'Регистрация владельца' }
+  { id: 'register', label: 'Регистрация владельца' },
+  { id: 'list', label: 'Список владельцев' }
 ];
 
 export default function OwnerPage() {
-  const [activeTab, setActiveTab] = useState<'search' | 'register'>('search');
+  const [activeTab, setActiveTab] = useState<'search' | 'register' | 'list'>('search');
 
   return (
     <div className="container mx-auto p-4">
@@ -63,6 +65,23 @@ export default function OwnerPage() {
             </p>
           </div>
           <OwnerForm />
+        </PermissionGate>
+      )}
+
+      {activeTab === 'list' && (
+        <PermissionGate 
+          resource="owners" 
+          action="read"
+          fallback={<div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            У вас нет прав для просмотра списка владельцев
+          </div>}
+        >
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Полный список владельцев транспортных средств с возможностью редактирования и удаления.
+            </p>
+          </div>
+          <OwnersList />
         </PermissionGate>
       )}
     </div>

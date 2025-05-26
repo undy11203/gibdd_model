@@ -25,3 +25,7 @@ export const getOrganizationById = async (id: number): Promise<Organization> => 
   const response = await api.get<Organization>(`/organizations/${id}`);
   return response.data;
 };
+
+export const deleteOrganization = async (id: number): Promise<void> => {
+  await api.delete(`/organizations/${id}`);
+};

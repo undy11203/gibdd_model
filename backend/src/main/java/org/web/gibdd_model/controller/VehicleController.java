@@ -251,6 +251,9 @@ public class VehicleController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteVehicle(@PathVariable Long id) {
         return vehicleRepository.findById(id).map(vehicle -> {
+            LicensePlate licensePlate = vehicle.getLicensePlate();
+            licensePlate.setStatus(true); // Mark as available
+            licensePlateRepository.save(licensePlate);
             vehicleRepository.delete(vehicle);
             return ResponseEntity.<Void>ok().build();
         }).orElseGet(() -> ResponseEntity.notFound().build());

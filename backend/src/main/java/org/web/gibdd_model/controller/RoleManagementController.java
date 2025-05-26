@@ -42,13 +42,13 @@ public class RoleManagementController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<RoleResponse> createRole(@RequestBody CreateRoleRequest request) {
         return ResponseEntity.ok(roleManagementService.createRole(request));
     }
 
     @PutMapping("/{roleId}")
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<RoleResponse> updateRole(
             @PathVariable Long roleId,
             @RequestBody UpdateRoleRequest request) {
@@ -56,46 +56,46 @@ public class RoleManagementController {
     }
 
     @PostMapping("/permissions")
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<PermissionResponse> createPermission(@RequestBody CreatePermissionRequest request) {
         return ResponseEntity.ok(roleManagementService.createPermission(request));
     }
 
     @PostMapping("/assign")
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<Void> assignRolesToUser(@RequestBody AssignRoleRequest request) {
         roleManagementService.assignRolesToUser(request);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
         return ResponseEntity.ok(roleManagementService.getAllRoles());
     }
 
     @GetMapping("/permissions")
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<List<PermissionResponse>> getAllPermissions() {
         return ResponseEntity.ok(roleManagementService.getAllPermissions());
     }
 
     @DeleteMapping("/{roleId}")
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<Void> deleteRole(@PathVariable Long roleId) {
         roleManagementService.deleteRole(roleId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/permissions/{permissionId}")
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<Void> deletePermission(@PathVariable Long permissionId) {
         roleManagementService.deletePermission(permissionId);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/permissions/{permissionId}")
-    @PreAuthorize("hasAuthority('roles_manage')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     public ResponseEntity<Void> updatePermission(@PathVariable Long permissionId, @RequestBody Permission request) {
         roleManagementService.updatePermission(permissionId, request);
         return ResponseEntity.ok().build();

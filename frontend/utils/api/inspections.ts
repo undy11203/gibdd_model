@@ -12,12 +12,12 @@ interface InspectionQueryParams {
 }
 
 export const getInspections = async (params?: InspectionQueryParams): Promise<InspectionResponse> => {
-  const response = await api.get<InspectionResponse>('/inspection', { params });
+  const response = await api.get<InspectionResponse>('/inspections', { params });
   return response.data;
 };
 
 export const addInspection = async (data: InspectionData): Promise<TechnicalInspection> => {
-  const response = await api.post<TechnicalInspection>('/inspection', data);
+  const response = await api.post<TechnicalInspection>('/inspections', data);
   return response.data;
 };
 
@@ -27,15 +27,15 @@ export const getOverdueInspections = async (): Promise<OverdueInspectionInfo[]> 
 };
 
 export const getInspectionById = async (id: number): Promise<TechnicalInspection> => {
-  const response = await api.get<TechnicalInspection>(`/inspection/${id}`);
+  const response = await api.get<TechnicalInspection>(`/inspections/${id}`);
   return response.data;
 };
 
 export const updateInspection = async (id: number, data: InspectionData): Promise<TechnicalInspection> => {
-  const response = await api.put<TechnicalInspection>(`/inspection/${id}`, data);
+  const response = await api.put<TechnicalInspection>(`/inspections/${id}`, data);
   return response.data;
 };
 
 export const deleteInspection = async (id: number): Promise<void> => {
-  await api.delete(`/inspection/${id}`);
+  await api.delete(`/inspections/${id}`);
 };

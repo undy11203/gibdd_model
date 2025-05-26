@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import AddSalePurchaseForm from '../../components/forms/AddSalePurchaseForm';
+import SalePurchasesList from '../../components/pro_search/SalePurchasesList';
 
 const SalesPage = () => {
-
   return (
     <div className="p-4">
       <button
@@ -26,7 +26,7 @@ const SalesPage = () => {
       </button>
       <h1 className="text-2xl font-bold mb-4">Sales Transactions</h1>
       <AddSalePurchaseForm />
-      
+      <SalePurchasesList />
     </div>
   );
 };

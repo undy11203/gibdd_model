@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import TabNav from '../../components/common/TabNav';
 import AddVehicleForm from '../../components/forms/AddVehicleForm';
-import { getVehicles } from '../../utils/api/vehicles';
+import { getVehicles, deleteVehicle } from '../../utils/api/vehicles';
 import { Vehicle } from '../../types/vehicles';
 import CRUDBrand from '@/components/CRUDBrand';
 import CRUDAlarmSystem from '@/components/CRUDAlarmSystem';
@@ -14,17 +14,31 @@ export default function Vehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [activeTab, setActiveTab] = useState<'list' | 'register' | 'brand' | 'alarm-system'>('list');
 
+  const fetchVehicles = async () => {
+    try {
+      const response = await getVehicles({});
+      setVehicles(response.content);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        const response = await getVehicles({});
-        setVehicles(response.content);
-      } catch (error) {
-        console.error(error);
-      }
-    };
     fetchVehicles();
   }, []);
+
+  const handleDeleteVehicle = async (id: number) => {
+    if (window.confirm('Вы уверены, что хотите удалить это транспортное средство?')) {
+      try {
+        await deleteVehicle(id);
+        // Refresh the list after deletion
+        fetchVehicles();
+      } catch (error) {
+        console.error('Error deleting vehicle:', error);
+        alert('Ошибка при удалении транспортного средства');
+      }
+    }
+  };
 
   const tabs = [
     { id: 'list', label: 'Список' },
@@ -61,8 +75,16 @@ export default function Vehicles() {
           <h2 className="text-xl font-semibold mb-4">Список транспортных средств</h2>
           <ul className="space-y-2 mb-6">
             {vehicles != undefined && vehicles.map((vehicle) => (
-              <li key={vehicle.id} className="border p-2 rounded">
-                <strong>{vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {vehicle.brand?.name ?? 'Unknown Brand'}, {vehicle.releaseDate}, {vehicle.owner?.fullName ?? 'Unknown Owner'}
+              <li key={vehicle.id} className="border p-2 rounded flex justify-between items-center">
+                <div>
+                  <strong>{vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {vehicle.brand?.name ?? 'Unknown Brand'}, {vehicle.releaseDate}, {vehicle.owner?.fullName ?? 'Unknown Owner'}
+                </div>
+                <button 
+                  onClick={() => handleDeleteVehicle(vehicle.id)}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+                >
+                  Удалить
+                </button>
               </li>
             ))}
           </ul>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getOrganizations, getOrganizationsByNumberFilter } from '../../utils/api/organizations';
+import { getOrganizations, getOrganizationsByNumberFilter, deleteOrganization } from '../../utils/api/organizations';
 import { Organization } from '../../types/organizations';
 import { PageResponse } from '../../types/common';
 
@@ -46,6 +46,19 @@ const OrganizationsDisplay = () => {
   useEffect(() => {
     fetchOrganizations();
   }, [page, series]);
+
+  const handleDeleteOrganization = async (id: number) => {
+    if (window.confirm('Вы уверены, что хотите удалить эту организацию?')) {
+      try {
+        await deleteOrganization(id);
+        // Refresh the list after deletion
+        fetchOrganizations();
+      } catch (error) {
+        console.error('Error deleting organization:', error);
+        setError('Ошибка при удалении организации');
+      }
+    }
+  };
 
   const handleFilter = () => {
     setPage(0);
@@ -108,6 +121,7 @@ const OrganizationsDisplay = () => {
               <th className="px-4 py-2">Район</th>
               <th className="px-4 py-2">Адрес</th>
               <th className="px-4 py-2">Директор</th>
+              <th className="px-4 py-2">Действия</th>
             </tr>
           </thead>
           <tbody>
@@ -117,6 +131,14 @@ const OrganizationsDisplay = () => {
                 <td className="px-4 py-2">{org.district}</td>
                 <td className="px-4 py-2">{org.address}</td>
                 <td className="px-4 py-2">{org.director}</td>
+                <td className="px-4 py-2">
+                  <button 
+                    onClick={() => handleDeleteOrganization(org.id)}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+                  >
+                    Удалить
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

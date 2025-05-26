@@ -7,6 +7,7 @@ import org.web.gibdd_model.model.FreeLicensePlateRange;
 import org.web.gibdd_model.model.FreeLicensePlateRangePK;
 import org.web.gibdd_model.model.LicensePlate;
 import org.web.gibdd_model.repository.FreeLicensePlateRangeRepository;
+import org.web.gibdd_model.repository.LicensePlateRepository;
 import org.web.gibdd_model.service.LicensePlateService;
 
 import java.util.HashMap;
@@ -20,6 +21,9 @@ public class NumberController {
 
     @Autowired
     private LicensePlateService licensePlateService;
+
+    @Autowired
+    private LicensePlateRepository licensePlateRepository;
     
     @Autowired
     private FreeLicensePlateRangeRepository freeLicensePlateRangeRepository;
@@ -138,6 +142,40 @@ public class NumberController {
         }
         
         freeLicensePlateRangeRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<LicensePlate>> getAllLicensePlates() {
+        List<LicensePlate> licensePlates = licensePlateRepository.findAll();
+        return ResponseEntity.ok(licensePlates);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<LicensePlate> getLicensePlateById(@PathVariable String licenseNumber) {
+        Optional<LicensePlate> licensePlate = licensePlateRepository.findById(licenseNumber);
+        return licensePlate.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    @PostMapping
+    public ResponseEntity<LicensePlate> createLicensePlate(@RequestBody LicensePlate licensePlate) {
+        LicensePlate savedLicensePlate = licensePlateRepository.save(licensePlate);
+        return ResponseEntity.ok(savedLicensePlate);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<LicensePlate> updateLicensePlate(@PathVariable String licenseNumber, @RequestBody LicensePlate licensePlate) {
+        if (!licensePlateRepository.existsById(licenseNumber)) {
+            return ResponseEntity.notFound().build();
+        }
+        licensePlate.setLicenseNumber(licenseNumber); // Убедитесь, что ID установлен
+        LicensePlate updatedLicensePlate = licensePlateRepository.save(licensePlate);
+        return ResponseEntity.ok(updatedLicensePlate);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLicensePlate(@PathVariable String licenseNumber) {
+        if (!licensePlateRepository.existsById(licenseNumber)) {
+            return ResponseEntity.notFound().build();
+        }
+        licensePlateRepository.deleteById(licenseNumber);
         return ResponseEntity.ok().build();
     }
 }

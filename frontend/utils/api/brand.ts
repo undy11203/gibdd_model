@@ -30,7 +30,7 @@ export const createBrand = async (brand: Brand): Promise<Brand> => {
 
 // Обновление существующего бренда
 export const updateBrand = async (id: number, brand: Partial<Brand>): Promise<Brand> => {
-  const response = await api.post<Brand>(`/brands/${id}`, brand);
+  const response = await api.put<Brand>(`/brands/${id}`, brand);
   return response.data;
 };
 

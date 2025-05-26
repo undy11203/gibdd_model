@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.dto.RoleManagementDTO.*;
+import org.web.gibdd_model.model.Permission;
 import org.web.gibdd_model.service.RoleManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -90,6 +91,13 @@ public class RoleManagementController {
     @PreAuthorize("hasAuthority('roles_manage')")
     public ResponseEntity<Void> deletePermission(@PathVariable Long permissionId) {
         roleManagementService.deletePermission(permissionId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/permissions/{permissionId}")
+    @PreAuthorize("hasAuthority('roles_manage')")
+    public ResponseEntity<Void> updatePermission(@PathVariable Long permissionId, @RequestBody Permission request) {
+        roleManagementService.updatePermission(permissionId, request);
         return ResponseEntity.ok().build();
     }
 }

@@ -13,7 +13,7 @@ import org.web.gibdd_model.repository.WantedVehicleRepository;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -108,5 +108,17 @@ public class WantedService {
         return List.of(Stream.of(WantedStatus.values())
                 .map(WantedStatus::getDescription)
                 .toArray(String[]::new));
+    }
+
+    public Optional<WantedVehicle> getWantedVehicleById(Long id) {
+        return wantedVehicleRepository.findById(id);
+    }
+
+    public Optional<WantedVehicle> updateWantedVehicle(Long id, WantedVehicleDTO wantedVehicleDTO) {
+        return wantedVehicleRepository.findById(id);
+    }
+
+    public void deleteWantedVehicle(Long id) {
+        wantedVehicleRepository.deleteById(id);
     }
 }

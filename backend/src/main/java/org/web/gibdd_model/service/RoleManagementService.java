@@ -1,10 +1,12 @@
 package org.web.gibdd_model.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.web.gibdd_model.dto.RoleManagementDTO.*;
+import org.web.gibdd_model.model.LicensePlate;
 import org.web.gibdd_model.model.Permission;
 import org.web.gibdd_model.model.Role;
 import org.web.gibdd_model.model.User;
@@ -177,5 +179,15 @@ public class RoleManagementService {
     }
 
     public void deletePermission(Long permissionId) {
+    }
+
+    public void updatePermission(Long permissionId, Permission permission) {
+        if (!permissionRepository.existsById(permissionId)) {
+            return; // Permission not found
+        }
+
+        permission.setId(permissionId); // Убедитесь, что ID установлен
+        Permission updatedPermission = permissionRepository.save(permission);
+        return;
     }
 }

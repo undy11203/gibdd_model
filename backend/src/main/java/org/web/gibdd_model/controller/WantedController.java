@@ -1,5 +1,7 @@
 package org.web.gibdd_model.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,7 @@ import org.web.gibdd_model.service.WantedService;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/wanted")
@@ -29,7 +32,33 @@ public class WantedController {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-//
+    @PostMapping
+    public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicleDTO wantedVehicleDTO) {
+        // Convert DTO to entity
+        WantedVehicle wantedVehicle = new WantedVehicle();
+
+        // Find the vehicle by ID
+        Vehicle vehicle = vehicleRepository.findById(wantedVehicleDTO.getVehicleId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + wantedVehicleDTO.getVehicleId()));
+
+        // Set the properties from DTO to entity
+        wantedVehicle.setVehicle(vehicle);
+        wantedVehicle.setAddedDate(wantedVehicleDTO.getAddedDate());
+        wantedVehicle.setReason(wantedVehicleDTO.getReason());
+        wantedVehicle.setStatus(WantedStatus.fromDescription(wantedVehicleDTO.getStatus()));
+
+        // Save the entity
+        WantedVehicle saved = wantedService.addToWanted(wantedVehicle);
+        return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<WantedVehicle> getWantedVehicleById(@PathVariable Long id) {
+        WantedVehicle wantedVehicle = wantedService.getWantedVehicleById(id)
+                .orElseThrow(() -> new RuntimeException("Wanted vehicle not found with id: " + id));
+        return ResponseEntity.ok(wantedVehicle);
+    }
+
     @GetMapping
     public Page<WantedVehicle> getAllWantedVehicles(
             @RequestParam(required = false) String reason,
@@ -40,6 +69,20 @@ public class WantedController {
         Pageable pageable = PageRequest.of(page, size);
         return wantedService.getAllWantedVehicles(reason, startDate, endDate, pageable);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Optional<WantedVehicle>> updateWantedVehicle(@PathVariable Long id, @RequestBody WantedVehicleDTO wantedVehicleDTO) {
+        Optional<WantedVehicle> updatedWantedVehicle = wantedService.updateWantedVehicle(id, wantedVehicleDTO);
+        return ResponseEntity.ok(updatedWantedVehicle);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWantedVehicle(@PathVariable Long id) {
+        wantedService.deleteWantedVehicle(id);
+        return ResponseEntity.noContent().build();
+    }
+
+//
 
 //
     @GetMapping("/hit-and-run")
@@ -69,25 +112,6 @@ public class WantedController {
     }
 
     //
-    @PostMapping
-    public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicleDTO wantedVehicleDTO) {
-        // Convert DTO to entity
-        WantedVehicle wantedVehicle = new WantedVehicle();
-
-        // Find the vehicle by ID
-        Vehicle vehicle = vehicleRepository.findById(wantedVehicleDTO.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle not found with id: " + wantedVehicleDTO.getVehicleId()));
-
-        // Set the properties from DTO to entity
-        wantedVehicle.setVehicle(vehicle);
-        wantedVehicle.setAddedDate(wantedVehicleDTO.getAddedDate());
-        wantedVehicle.setReason(wantedVehicleDTO.getReason());
-        wantedVehicle.setStatus(WantedStatus.fromDescription(wantedVehicleDTO.getStatus()));
-
-        // Save the entity
-        WantedVehicle saved = wantedService.addToWanted(wantedVehicle);
-        return ResponseEntity.ok(saved);
-    }
 
 //
     @PutMapping("/{id}/found")

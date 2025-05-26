@@ -33,7 +33,7 @@ export const createAlarmSystem = async (alarmSystem: AlarmSystem): Promise<Alarm
 
 // Обновление существующей системы сигнализации
 export const updateAlarmSystem = async (id: number, alarmSystem: Partial<AlarmSystem>): Promise<AlarmSystem> => {
-  const response = await api.post<AlarmSystem>(`/alarm-systems/${id}`, alarmSystem);
+  const response = await api.put<AlarmSystem>(`/alarm-systems/${id}`, alarmSystem);
   return response.data;
 };
 

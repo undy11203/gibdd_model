@@ -61,7 +61,7 @@ public class AlarmSystemController {
                 .body(savedAlarmSystem);
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<AlarmSystem> partialUpdateAlarmSystem(
             @PathVariable Integer id,
             @RequestBody AlarmSystem alarmSystemDetails) {

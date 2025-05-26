@@ -56,7 +56,7 @@ public class BrandController {
                 .body(savedBrand);
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Brand> partialUpdateBrand(
             @PathVariable Long id,
             @RequestBody Brand brandDetails) {

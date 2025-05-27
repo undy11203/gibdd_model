@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.web.gibdd_model.dto.*;
 import org.web.gibdd_model.model.Accident;
 import org.web.gibdd_model.model.enums.AccidentType;
@@ -24,6 +25,7 @@ public class AccidentController {
     private AccidentService accidentService;
 
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
     public Page<Accident> getAccidents(
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo,
@@ -35,6 +37,7 @@ public class AccidentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasPermission('CREATE_ACCIDENTS', '')")
     public ResponseEntity<Accident> createAccident(@RequestBody CreateAccidentDTO createAccidentDTO) {
         try {
             Accident accident = accidentService.createAccident(createAccidentDTO);
@@ -45,18 +48,21 @@ public class AccidentController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
     public ResponseEntity<Accident> getAccidentById(@PathVariable Long id) {
         Optional<Accident> accident = accidentService.getAccidentById(id);
         return accident.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('CREATE_ACCIDENTS', '')")
     public ResponseEntity<Accident> updateAccident(@PathVariable Long id, @RequestBody Accident accidentDetails) {
         Optional<Accident> updatedAccident = accidentService.updateAccident(id, accidentDetails);
         return updatedAccident.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('CREATE_ACCIDENTS', '')")
     public ResponseEntity<Object> deleteAccident(@PathVariable Long id) {
         boolean deleted = accidentService.deleteAccident(id);
         if (deleted) {
@@ -67,6 +73,7 @@ public class AccidentController {
     }
 
     @GetMapping("/statistics")
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
     public ResponseEntity<List<AccidentStatisticsDTO>> getAccidentStatistics(
             @RequestParam LocalDate startDate,
             @RequestParam LocalDate endDate,
@@ -76,18 +83,21 @@ public class AccidentController {
     }
 
     @GetMapping("/analysis")
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
     public ResponseEntity<AccidentAnalysisDTO> getAccidentAnalysis() {
         AccidentAnalysisDTO analysis = accidentService.getAccidentAnalysis();
         return ResponseEntity.ok(analysis);
     }
 
     @GetMapping("/drunk-driving-stats")
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
     public ResponseEntity<DrunkDrivingStatsDTO> getDrunkDrivingStatistics() {
         DrunkDrivingStatsDTO stats = accidentService.getDrunkDrivingStatistics();
         return ResponseEntity.ok(stats);
     }
 
     @GetMapping("/accident-types")
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
     public ResponseEntity<Collection<Object>> getAccidentTypes() {
         if (accidentService.getAccidentTypes().isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -97,6 +107,7 @@ public class AccidentController {
     }
 
     @GetMapping("/accident-roles")
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
     public ResponseEntity<Collection<Object>> getAccidentRoles() {
         return ResponseEntity.ok(accidentService.getAccidentRoles());
     }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.dto.WantedVehicleDTO;
 import org.web.gibdd_model.dto.WantedVehicleStatsDTO;
@@ -33,6 +34,7 @@ public class WantedController {
     private VehicleRepository vehicleRepository;
 
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_WANTED', '')")
     public ResponseEntity<WantedVehicle> addToWanted(@RequestBody WantedVehicleDTO wantedVehicleDTO) {
         // Convert DTO to entity
         WantedVehicle wantedVehicle = new WantedVehicle();
@@ -53,6 +55,7 @@ public class WantedController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_WANTED', '')")
     public ResponseEntity<WantedVehicle> getWantedVehicleById(@PathVariable Long id) {
         WantedVehicle wantedVehicle = wantedService.getWantedVehicleById(id)
                 .orElseThrow(() -> new RuntimeException("Wanted vehicle not found with id: " + id));
@@ -60,6 +63,7 @@ public class WantedController {
     }
 
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_WANTED', '')")
     public Page<WantedVehicle> getAllWantedVehicles(
             @RequestParam(required = false) String reason,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -71,12 +75,14 @@ public class WantedController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_WANTED', '')")
     public ResponseEntity<Optional<WantedVehicle>> updateWantedVehicle(@PathVariable Long id, @RequestBody WantedVehicleDTO wantedVehicleDTO) {
         Optional<WantedVehicle> updatedWantedVehicle = wantedService.updateWantedVehicle(id, wantedVehicleDTO);
         return ResponseEntity.ok(updatedWantedVehicle);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_WANTED', '')")
     public ResponseEntity<Void> deleteWantedVehicle(@PathVariable Long id) {
         wantedService.deleteWantedVehicle(id);
         return ResponseEntity.noContent().build();
@@ -86,18 +92,21 @@ public class WantedController {
 
 //
     @GetMapping("/hit-and-run")
+    @PreAuthorize("hasPermission('VIEW_WANTED', '')")
     public List<WantedVehicle> getHitAndRunVehicles() {
         return wantedService.getHitAndRunVehicles();
     }
 
 //
     @GetMapping("/stolen")
+    @PreAuthorize("hasPermission('VIEW_WANTED', '')")
     public List<WantedVehicle> getStolenVehicles() {
         return wantedService.getStolenVehicles();
     }
 
 //
     @GetMapping("/stats")
+    @PreAuthorize("hasPermission('VIEW_WANTED', '')")
     public ResponseEntity<WantedVehicleStatsDTO> getWantedVehicleStats() {
         WantedVehicleStatsDTO stats = wantedService.getWantedVehicleStats();
         return ResponseEntity.ok(stats);
@@ -105,6 +114,7 @@ public class WantedController {
 
 //
     @GetMapping("/found")
+    @PreAuthorize("hasPermission('VIEW_WANTED', '')")
     public List<WantedVehicle> getFoundVehicles(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -115,6 +125,7 @@ public class WantedController {
 
 //
     @PutMapping("/{id}/found")
+    @PreAuthorize("hasPermission('MANAGE_WANTED', '')")
     public ResponseEntity<WantedVehicle> markAsFound(
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate foundDate) {
@@ -127,6 +138,7 @@ public class WantedController {
     }
 
     @GetMapping("/wanted-status")
+    @PreAuthorize("hasPermission('VIEW_WANTED', '')")
     public ResponseEntity<Collection<Object>> getWantedVehicleStatus() {
         return ResponseEntity.ok().body(wantedService.getWantedVehicleStatus());
     }

@@ -22,6 +22,7 @@ public class TechnicalInspectionController {
     private final TechnicalInspectionService technicalInspectionService;
 
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_INSPECTIONS', '')")
     public ResponseEntity<Page<TechnicalInspection>> getAllInspections(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit) {
@@ -30,6 +31,7 @@ public class TechnicalInspectionController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_INSPECTIONS', '')")
     public ResponseEntity<TechnicalInspection> getInspectionById(@PathVariable Long id) {
         try {
             TechnicalInspection inspection = technicalInspectionService.getInspectionById(id);
@@ -40,19 +42,21 @@ public class TechnicalInspectionController {
     }
 
     @GetMapping("/owner/{ownerId}")
+    @PreAuthorize("hasPermission('VIEW_INSPECTIONS', '')")
     public ResponseEntity<List<TechnicalInspection>> getInspectionsByOwnerId(@PathVariable Long ownerId) {
         List<TechnicalInspection> inspections = technicalInspectionService.getInspectionsByOwnerId(ownerId);
         return ResponseEntity.ok(inspections);
     }
 
     @GetMapping("/vehicle/{vehicleId}")
+    @PreAuthorize("hasPermission('VIEW_INSPECTIONS', '')")
     public ResponseEntity<List<TechnicalInspection>> getInspectionsByVehicleId(@PathVariable Long vehicleId) {
         List<TechnicalInspection> inspections = technicalInspectionService.getInspectionsByVehicleId(vehicleId);
         return ResponseEntity.ok(inspections);
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('MANAGE_INSPECTIONS')")
+    @PreAuthorize("hasPermission('MANAGE_INSPECTIONS', '')")
     public ResponseEntity<TechnicalInspection> createInspection(@RequestBody TechnicalInspectionDTO inspectionDTO) {
         try {
             TechnicalInspection createdInspection = technicalInspectionService.createInspection(inspectionDTO);
@@ -63,7 +67,7 @@ public class TechnicalInspectionController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGE_INSPECTIONS')")
+    @PreAuthorize("hasPermission('MANAGE_INSPECTIONS', '')")
     public ResponseEntity<TechnicalInspection> updateInspection(
             @PathVariable Long id,
             @RequestBody TechnicalInspectionDTO inspectionDTO) {
@@ -76,7 +80,7 @@ public class TechnicalInspectionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGE_INSPECTIONS')")
+    @PreAuthorize("hasPermission('MANAGE_INSPECTIONS', '')")
     public ResponseEntity<Void> deleteInspection(@PathVariable Long id) {
         try {
             technicalInspectionService.deleteInspection(id);

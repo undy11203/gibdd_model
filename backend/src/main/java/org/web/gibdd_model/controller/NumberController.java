@@ -2,6 +2,7 @@ package org.web.gibdd_model.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.model.FreeLicensePlateRange;
 import org.web.gibdd_model.model.FreeLicensePlateRangePK;
@@ -29,6 +30,7 @@ public class NumberController {
     private FreeLicensePlateRangeRepository freeLicensePlateRangeRepository;
 
     @GetMapping("/validate/{licenseNumber}")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<Object> validateLicensePlate(@PathVariable String licenseNumber) {
         boolean isValid = licensePlateService.validateLicensePlateFormat(licenseNumber);
         
@@ -53,6 +55,7 @@ public class NumberController {
     }
 
     @GetMapping("/hot")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<List<LicensePlate>> getHotLicensePlates() {
         List<LicensePlate> hotPlates = licensePlateService.getHotLicensePlates();
         return ResponseEntity.ok(hotPlates);
@@ -61,11 +64,13 @@ public class NumberController {
     // CRUD operations for FreeLicensePlateRange
     
     @GetMapping("/ranges")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<List<FreeLicensePlateRange>> getAllRanges() {
         return ResponseEntity.ok(freeLicensePlateRangeRepository.findAll());
     }
     
     @GetMapping("/ranges/series/{series}")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<List<FreeLicensePlateRange>> getRangesBySeries(@PathVariable String series) {
         List<FreeLicensePlateRange> ranges = freeLicensePlateRangeRepository.findBySeries(series);
         if (ranges.isEmpty()) {
@@ -75,6 +80,7 @@ public class NumberController {
     }
     
     @PostMapping("/ranges")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<FreeLicensePlateRange> createRange(@RequestBody Map<String, Object> requestBody) {
         // Extract and validate the fields
         String series = (String) requestBody.get("series");
@@ -104,6 +110,7 @@ public class NumberController {
     }
     
     @PutMapping("/ranges")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<FreeLicensePlateRange> updateRange(@RequestBody Map<String, Object> requestBody) {
         // Extract and validate the fields
         String series = (String) requestBody.get("series");
@@ -133,6 +140,7 @@ public class NumberController {
     }
     
     @DeleteMapping("/ranges")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Void> deleteRange(@RequestParam String series, 
                                            @RequestParam Integer startNumber, 
                                            @RequestParam Integer endNumber) {
@@ -146,22 +154,26 @@ public class NumberController {
     }
 
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<List<LicensePlate>> getAllLicensePlates() {
         List<LicensePlate> licensePlates = licensePlateRepository.findAll();
         return ResponseEntity.ok(licensePlates);
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<LicensePlate> getLicensePlateById(@PathVariable String licenseNumber) {
         Optional<LicensePlate> licensePlate = licensePlateRepository.findById(licenseNumber);
         return licensePlate.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<LicensePlate> createLicensePlate(@RequestBody LicensePlate licensePlate) {
         LicensePlate savedLicensePlate = licensePlateRepository.save(licensePlate);
         return ResponseEntity.ok(savedLicensePlate);
     }
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<LicensePlate> updateLicensePlate(@PathVariable String licenseNumber, @RequestBody LicensePlate licensePlate) {
         if (!licensePlateRepository.existsById(licenseNumber)) {
             return ResponseEntity.notFound().build();
@@ -171,6 +183,7 @@ public class NumberController {
         return ResponseEntity.ok(updatedLicensePlate);
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Void> deleteLicensePlate(@PathVariable String licenseNumber) {
         if (!licensePlateRepository.existsById(licenseNumber)) {
             return ResponseEntity.notFound().build();

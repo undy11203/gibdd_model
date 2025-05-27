@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.model.Owner;
 import org.web.gibdd_model.repository.OwnerRepository;
@@ -26,6 +27,7 @@ public class OwnerController {
 
 //
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_OWNERS', '')")
     public Page<Owner> getOwners(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -39,12 +41,14 @@ public class OwnerController {
 
 //
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_OWNERS', '')")
     public Owner createOwner(@RequestBody Owner owner) {
         return ownerRepository.save(owner);
     }
 
 //
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_OWNERS', '')")
     public ResponseEntity<Owner> getOwnerById(@PathVariable Long id) {
         Optional<Owner> owner = ownerRepository.findById(id);
         return owner.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -52,6 +56,7 @@ public class OwnerController {
 
 //
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_OWNERS', '')")
     public ResponseEntity<Owner> updateOwner(@PathVariable Long id, @RequestBody Owner ownerDetails) {
         return ownerRepository.findById(id).map(owner -> {
             owner.setFullName(ownerDetails.getFullName());
@@ -64,6 +69,7 @@ public class OwnerController {
 
 //
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_OWNERS', '')")
     public ResponseEntity<Object> deleteOwner(@PathVariable Long id) {
         return ownerRepository.findById(id).map(owner -> {
             ownerRepository.delete(owner);
@@ -72,6 +78,7 @@ public class OwnerController {
     }
 
     @GetMapping("/overdue-inspections")
+    @PreAuthorize("hasPermission('VIEW_OWNERS', '')")
     public List<OwnerOverdueInspectionDTO> getOwnersWithOverdueInspections() {
         return ownerService.getOwnersWithOverdueInspection();
     }

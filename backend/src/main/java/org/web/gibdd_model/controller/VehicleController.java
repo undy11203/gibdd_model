@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.dto.VehicleDTO;
 import org.web.gibdd_model.model.Vehicle;
@@ -54,8 +55,8 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
-//
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<Page<Vehicle>> getVehicles(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) Long ownerId,
@@ -76,8 +77,8 @@ public class VehicleController {
         return ResponseEntity.ok(vehicles);
     }
 
-//
     @GetMapping("/owner-by-license")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<?> getOwnerByLicense(@RequestParam String licenseNumber) {
         var owner = vehicleService.getOwnerByLicenseNumber(licenseNumber);
         if (owner == null) {
@@ -86,8 +87,8 @@ public class VehicleController {
         return ResponseEntity.ok(owner);
     }
 
-//
     @GetMapping("/dossier-by-license")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<?> getVehicleDossierByLicense(@RequestParam String licenseNumber) {
         var dossier = vehicleService.getVehicleDossier(licenseNumber);
         if (dossier == null) {
@@ -104,6 +105,7 @@ public class VehicleController {
     private FreeLicensePlateRangeRepository freeLicensePlateRangeRepository;
 
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Vehicle> createVehicle(@RequestBody VehicleDTO vehicleDTO) {
         // If the vehicle has a license plate number string but no actual license plate object
         if (vehicleDTO.getLicenseNumber() == null) {
@@ -223,12 +225,14 @@ public class VehicleController {
 
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<Vehicle> getVehicleById(@PathVariable Long id) {
         Optional<Vehicle> vehicle = vehicleRepository.findById(id);
         return vehicle.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Vehicle> updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicleDetails) {
         return vehicleRepository.findById(id).map(vehicle -> {
             vehicle.setBrand(vehicleDetails.getBrand());
@@ -249,6 +253,7 @@ public class VehicleController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Object> deleteVehicle(@PathVariable Long id) {
         return vehicleRepository.findById(id).map(vehicle -> {
             LicensePlate licensePlate = vehicle.getLicensePlate();
@@ -260,6 +265,7 @@ public class VehicleController {
     }
 
     @GetMapping("/vehicle-types")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<Collection<Object>> getVehicleTypes() {
         return ResponseEntity.ok().body(vehicleService.getVehicleTypes());
     }

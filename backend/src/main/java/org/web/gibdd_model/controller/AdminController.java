@@ -3,6 +3,7 @@ package org.web.gibdd_model.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.dto.SqlQueryRequestDTO;
 import org.web.gibdd_model.dto.SqlQueryResponseDTO;
@@ -20,6 +21,7 @@ public class AdminController {
 
 //
     @PostMapping("/execute-query")
+    @PreAuthorize("hasPermission('EXECUTE_QUERIES', '')")
     public ResponseEntity<SqlQueryResponseDTO> executeQuery(@RequestBody SqlQueryRequestDTO request) {
         try {
             String query = request.getQuery();

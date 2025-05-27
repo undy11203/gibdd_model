@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.model.Organization;
 import org.web.gibdd_model.repository.OrganizationRepository;
@@ -24,6 +25,7 @@ public class OrganizationController {
 
 //
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_ORGANIZATIONS', '')")
     public Page<Organization> getOrganizations(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -37,6 +39,7 @@ public class OrganizationController {
 
 //
     @GetMapping("/number-filter")
+    @PreAuthorize("hasPermission('VIEW_ORGANIZATIONS', '')")
     public Page<Organization> getOrganizationsByNumberFilter(
             @RequestParam(required = false) String series,
             @RequestParam(defaultValue = "0") int page,
@@ -47,17 +50,20 @@ public class OrganizationController {
 
 //
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_ORGANIZATIONS', '')")
     public Organization createOrganization(@RequestBody Organization organization) {
         return organizationRepository.save(organization);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_ORGANIZATIONS', '')")
     public ResponseEntity<Organization> getOrganizationById(@PathVariable Long id) {
         Optional<Organization> organization = organizationRepository.findById(id);
         return organization.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_ORGANIZATIONS', '')")
     public ResponseEntity<Organization> updateOrganization(@PathVariable Long id, @RequestBody Organization organizationDetails) {
         return organizationRepository.findById(id).map(organization -> {
             organization.setName(organizationDetails.getName());
@@ -70,6 +76,7 @@ public class OrganizationController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_ORGANIZATIONS', '')")
     public ResponseEntity<Object> deleteOrganization(@PathVariable Long id) {
         return organizationRepository.findById(id).map(organization -> {
             organizationRepository.delete(organization);

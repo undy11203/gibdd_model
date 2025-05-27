@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.model.Brand;
 import org.web.gibdd_model.model.enums.TheftPopularity;
@@ -22,6 +23,7 @@ public class BrandController {
     private BrandService brandService;
 
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public Page<Brand> getBrand(@RequestParam(required = false) String search,
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "10") int limit) {
@@ -32,6 +34,7 @@ public class BrandController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<Brand> getBrandById(@PathVariable Long id) {
         Optional<Brand> brand = brandRepository.findById(id);
         return brand
@@ -40,11 +43,13 @@ public class BrandController {
     }
 
     @GetMapping("/theft-popularity")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<Collection<Object>> getTheftPopularity() {
         return ResponseEntity.ok().body(brandService.getTheftPopularity());
     }
 
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Brand> createBrand(@RequestBody Brand brand) {
         if (brand.getId() != null) {
             return ResponseEntity.badRequest().build(); // ID должен быть null для создания
@@ -57,6 +62,7 @@ public class BrandController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Brand> partialUpdateBrand(
             @PathVariable Long id,
             @RequestBody Brand brandDetails) {
@@ -78,6 +84,7 @@ public class BrandController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Void> deleteBrand(@PathVariable Long id) {
         return brandRepository.findById(id)
                 .map(brand -> {

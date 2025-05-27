@@ -2,6 +2,7 @@ package org.web.gibdd_model.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web.gibdd_model.dto.SalePurchaseDTO;
 import org.web.gibdd_model.model.Owner;
@@ -26,11 +27,13 @@ public class SalePurchaseController {
     }
 
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_SALES', '')")
     public List<SalePurchase> getAll() {
         return salePurchaseService.findAll();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_SALES', '')")
     public ResponseEntity<SalePurchase> getById(@PathVariable Long id) {
         Optional<SalePurchase> salePurchase = salePurchaseService.findById(id);
         return salePurchase.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -43,6 +46,7 @@ public class SalePurchaseController {
     private OwnerRepository ownerRepository;
 
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_SALES', '')")
     public SalePurchase create(@RequestBody SalePurchaseDTO salePurchase) {
         // Fetch related entities by IDs
         Vehicle vehicle = vehicleRepository.findById(Long.valueOf(salePurchase.getVehicleId()))
@@ -71,6 +75,7 @@ public class SalePurchaseController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_SALES', '')")
     public ResponseEntity<SalePurchase> update(@PathVariable Long id, @RequestBody SalePurchase salePurchase) {
         Optional<SalePurchase> existing = salePurchaseService.findById(id);
         if (existing.isPresent()) {
@@ -83,6 +88,7 @@ public class SalePurchaseController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_SALES', '')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Optional<SalePurchase> existing = salePurchaseService.findById(id);
         if (existing.isPresent()) {

@@ -40,16 +40,13 @@ public class AuthenticationController {
 //
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
-        // Since we're using JWT, we don't need to do anything server-side
-        // The client will remove the token
+
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/check")
     public ResponseEntity<Void> checkAuthentication() {
-        // This endpoint is just for checking if the token is valid
-        // If the request reaches here, it means the token is valid
-        // (due to JWT filter authentication)
+
         return ResponseEntity.ok().build();
     }
 }

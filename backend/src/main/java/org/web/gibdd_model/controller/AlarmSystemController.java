@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -31,6 +32,7 @@ public class AlarmSystemController {
     }
 
     @GetMapping
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public Page<AlarmSystem> getAlarmSystems(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -42,6 +44,7 @@ public class AlarmSystemController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public ResponseEntity<AlarmSystem> getAlarmSystemById(@PathVariable Integer id) {
         Optional<AlarmSystem> alarmSystem = alarmSystemRepository.findById(id);
         return alarmSystem
@@ -50,6 +53,7 @@ public class AlarmSystemController {
     }
 
     @PostMapping
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<AlarmSystem> createAlarmSystem(@RequestBody AlarmSystem alarmSystem) {
         if (alarmSystem.getId() != null) {
             return ResponseEntity.badRequest().build(); // ID должен быть null для создания
@@ -62,6 +66,7 @@ public class AlarmSystemController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<AlarmSystem> partialUpdateAlarmSystem(
             @PathVariable Integer id,
             @RequestBody AlarmSystem alarmSystemDetails) {
@@ -83,6 +88,7 @@ public class AlarmSystemController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Void> deleteAlarmSystem(@PathVariable Integer id) {
         return alarmSystemRepository.findById(id)
                 .map(alarmSystem -> {
@@ -93,11 +99,13 @@ public class AlarmSystemController {
     }
 
     @GetMapping("/reliable")
+    @PreAuthorize("hasPermission('VIEW_VEHICLES', '')")
     public List<Object[]> getMostReliableAlarmSystems() {
         return alarmSystemRepository.getMostReliableAlarmSystems();
     }
 
     @GetMapping("/alarm-systems-reliable")
+    @PreAuthorize("hasPermission('MANAGE_VEHICLES', '')")
     public ResponseEntity<Collection<Object>> getAlarmSystemsReliable() {
         return ResponseEntity.ok().body(alarmSystemService.getReliableAlarmSystems());
     }

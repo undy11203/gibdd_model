@@ -44,7 +44,7 @@ const SuggestionInput: React.FC<SuggestionInputProps> = ({
         value={inputValue}
         onChange={handleInputChange}
         placeholder={placeholder}
-        className="border p-2 w-full max-w-full"
+        className="border p-2 w-full max-w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow"
         autoComplete="off"
       />
       {loading && <p>Загрузка...</p>}

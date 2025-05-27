@@ -285,7 +285,7 @@ const AddVehicleForm = () => {
                 required: "Это поле обязательно",
                 onChange: (e) => validateLicensePlateNumber(e.target.value),
               })}
-              className={`border p-2 w-full ${
+              className={`border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow ${
                 licensePlateValidation.isValid === false ? "border-red-500" : 
                 licensePlateValidation.isValid === true ? "border-green-500" : ""
               }`}
@@ -299,7 +299,7 @@ const AddVehicleForm = () => {
         <input
           type="date"
           {...register("releaseDate", { required: "Это поле обязательно" })}
-          className="border p-2 w-full"
+          className="border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow"
         />
 
         {/* Объем двигателя */}
@@ -307,7 +307,7 @@ const AddVehicleForm = () => {
         <input
           type="number"
           {...register("engineVolume", { required: "Это поле обязательно" })}
-          className="border p-2 w-full"
+          className="border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow"
         />
 
         {/* Номер двигателя */}
@@ -315,7 +315,7 @@ const AddVehicleForm = () => {
         <input
           type="text"
           {...register("engineNumber", { required: "Это поле обязательно" })}
-          className="border p-2 w-full"
+          className="border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow"
         />
 
         {/* Номер шасси */}
@@ -323,7 +323,7 @@ const AddVehicleForm = () => {
         <input
           type="text"
           {...register("chassisNumber", { required: "Это поле обязательно" })}
-          className="border p-2 w-full"
+          className="border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow"
         />
 
         {/* Номер кузова */}
@@ -331,7 +331,7 @@ const AddVehicleForm = () => {
         <input
           type="text"
           {...register("bodyNumber", { required: "Это поле обязательно" })}
-          className="border p-2 w-full"
+          className="border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow"
         />
 
         {/* Цвет */}
@@ -339,14 +339,14 @@ const AddVehicleForm = () => {
         <input
           type="text"
           {...register("color", { required: "Это поле обязательно" })}
-          className="border p-2 w-full"
+          className="border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow"
         />
 
         {/* Тип ТС */}
         <div>Тип ТС</div>
         <select
           {...register("vehicleType", { required: "Это поле обязательно" })}
-          className="border p-2 w-full"
+          className="border p-2 w-full border shadow-sm border-gray-300 rounded-md p-2 flex-grow"
         >
           <option value="">Тип ТС</option>
           {vehicleTypes.map((type) => (

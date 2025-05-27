@@ -75,7 +75,7 @@ export default function Vehicles() {
           <h2 className="text-xl font-semibold mb-4">Список транспортных средств</h2>
           <ul className="space-y-2 mb-6">
             {vehicles != undefined && vehicles.map((vehicle) => (
-              <li key={vehicle.id} className="border p-2 rounded flex justify-between items-center">
+              <li key={vehicle.id} className="border p-2 rounded flex justify-between items-center border border-gray-300 rounded-md p-2 flex-grow">
                 <div>
                   <strong>{vehicle.licensePlate?.licenseNumber ?? 'Unknown License Plate'}</strong> - {vehicle.brand?.name ?? 'Unknown Brand'}, {vehicle.releaseDate}, {vehicle.owner?.fullName ?? 'Unknown Owner'}
                 </div>
@@ -99,7 +99,9 @@ export default function Vehicles() {
             У вас нет прав для регистрации транспортных средств
           </div>}
         >
-          <AddVehicleForm />
+          <div className="bg-white rounded-lg shadow p-6">
+            <AddVehicleForm />
+          </div>
         </PermissionGate>
       )}
 

@@ -66,7 +66,9 @@ export default function WantedPage() {
               Убедитесь, что указанный номерной знак зарегистрирован в системе.
             </p>
           </div>
-          <AddWantedVehicleForm />
+          <div className="bg-white rounded-lg shadow p-6">
+            <AddWantedVehicleForm />
+          </div>
         </PermissionGate>
       )}
     </div>

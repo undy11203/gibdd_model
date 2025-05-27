@@ -33,7 +33,7 @@ const OwnerForm = () => {
           type="text"
           id="fullName"
           {...register("fullName", { required: true })}
-          className="w-full p-2 border border-gray-300 rounded"
+          className="w-full p-2 border border-gray-300 rounded shadow-sm"
         />
       </div>
 
@@ -45,7 +45,7 @@ const OwnerForm = () => {
         <input
           id="address"
           {...register("address", { required: true })}
-          className="w-full p-2 border border-gray-300 rounded"
+          className="w-full p-2 border border-gray-300 rounded shadow-sm"
         />
       </div>
 
@@ -58,7 +58,7 @@ const OwnerForm = () => {
           type="tel"
           id="phone"
           {...register("phone", { required: true })}
-          className="w-full p-2 border border-gray-300 rounded"
+          className="w-full p-2 border border-gray-300 rounded shadow-sm"
         />
       </div>
 

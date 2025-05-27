@@ -103,7 +103,7 @@ const AddSalePurchaseForm = () => {
       {/* Выбор транспортного средства */}
       <select
         {...register('vehicleId', { valueAsNumber: true })}
-        className="border p-2 w-full max-w-full"
+        className="border p-2 w-full max-w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow"
         disabled={!sellerId}
       >
         <option value="">Выберите транспортное средство</option>
@@ -115,12 +115,12 @@ const AddSalePurchaseForm = () => {
       </select>
 
       {/* Дата и стоимость */}
-      <input type="date" {...register('date')} className="border p-2 w-full max-w-full" />
+      <input type="date" {...register('date')} className="border p-2 w-full max-w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow" />
       <input
         type="number"
         placeholder="Стоимость"
         {...register('cost', { valueAsNumber: true })}
-        className="border p-2 w-full max-w-full"
+        className="border p-2 w-full max-w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow"
         min="0"
         step="0.01"
       />

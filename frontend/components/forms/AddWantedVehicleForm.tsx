@@ -121,7 +121,7 @@ const AddWantedForm = () => {
           </label>
           <select
             {...register("vehicleId", { valueAsNumber: true, required: "Это поле обязательно" })}
-            className={`border p-2 w-full`}
+            className={`border p-2 w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow`}
             disabled={!ownerId}
           >
             <option value="">Выберите транспортное средство</option>
@@ -143,7 +143,7 @@ const AddWantedForm = () => {
       <input
         type="date"
         {...register("addedDate", { required: "Это поле обязательно" })}
-        className={`border p-2 w-full `}
+        className={`border p-2 w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow `}
       />
 
       {/* Причина */}
@@ -152,7 +152,7 @@ const AddWantedForm = () => {
       </label>
       <select
         {...register("reason", { required: "Это поле обязательно" })}
-        className={`border p-2 w-full`}
+        className={`border p-2 w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow`}
       >
         {/* Hardcoded string options as WantedReason enum is removed and not fetched */}
         <option value="Угон">Угон</option>
@@ -165,7 +165,7 @@ const AddWantedForm = () => {
       </label>
       <select
         {...register("status", { required: "Это поле обязательно" })}
-        className={`border p-2 w-full`}
+        className={`border p-2 w-full shadow-sm border border-gray-300 rounded-md p-2 flex-grow`}
       >
         <option value="">Выберите статус</option>
         {wantedStatusOptions.map((status) => (

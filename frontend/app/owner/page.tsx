@@ -64,7 +64,9 @@ export default function OwnerPage() {
               Регистрация нового владельца транспортного средства в системе.
             </p>
           </div>
-          <OwnerForm />
+          <div className="bg-white rounded-lg shadow p-6">
+            <OwnerForm />
+          </div>
         </PermissionGate>
       )}
 

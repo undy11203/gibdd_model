@@ -67,7 +67,9 @@ export default function InspectionPage() {
               Выберите владельца для отображения всех его технических осмотров.
             </p>
           </div>
-          <OwnerInspectionsDisplay />
+          <div className="bg-white rounded-lg shadow p-6">
+            <OwnerInspectionsDisplay />
+          </div>
         </PermissionGate>
       )}
 
@@ -85,7 +87,9 @@ export default function InspectionPage() {
               Укажите номерной знак ТС, дату проведения и результат осмотра.
             </p>
           </div>
-          <AddTechnicalInspectionForm />
+          <div className="bg-white rounded-lg shadow p-6">
+            <AddTechnicalInspectionForm />
+          </div>
         </PermissionGate>
       )}
     </div>

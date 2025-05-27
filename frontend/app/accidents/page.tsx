@@ -42,7 +42,9 @@ export default function AccidentsPage() {
             У вас нет прав для просмотра статистики ДТП
           </div>}
         >
-          <AccidentStatistics />
+          <div className="bg-white rounded-lg shadow p-6">
+            <AccidentStatistics />
+          </div>
         </PermissionGate>
       )}
       
@@ -54,7 +56,9 @@ export default function AccidentsPage() {
             У вас нет прав для просмотра анализа ДТП
           </div>}
         >
-          <AccidentAnalysisDisplay />
+          <div className="bg-white rounded-lg shadow p-6">
+            <AccidentAnalysisDisplay />
+          </div>
         </PermissionGate>
       )}
       
@@ -66,7 +70,9 @@ export default function AccidentsPage() {
             У вас нет прав для регистрации ДТП
           </div>}
         >
-          <AddAccidentForm />
+          <div className="bg-white rounded-lg shadow p-6">
+            <AddAccidentForm />
+          </div>
         </PermissionGate>
       )}
     </div>

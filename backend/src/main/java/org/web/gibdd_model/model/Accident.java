@@ -6,6 +6,7 @@ import org.locationtech.jts.geom.Point;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import org.web.gibdd_model.model.enums.AccidentType;
+import org.web.gibdd_model.model.enums.AccidentCause;
 
 import java.time.LocalDate;
 
@@ -33,7 +34,8 @@ public class Accident {
 
     private Double damageAmount;
 
-    private String cause; // Причина происшествия
+    @Enumerated(EnumType.STRING)
+    private AccidentCause cause; // Причина происшествия
 
     private String roadConditions;
 }

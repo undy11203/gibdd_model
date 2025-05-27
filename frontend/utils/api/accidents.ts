@@ -23,6 +23,11 @@ export const getAccidentStatistics = async (params: AccidentStatisticsParams): P
   return response.data;
 };
 
+export const getAccidentStatisticsByCause = async (params: AccidentStatisticsParams): Promise<AccidentStatisticsDTO[]> => {
+  const response = await api.get<AccidentStatisticsDTO[]>('/accidents/statistics-by-cause', { params });
+  return response.data;
+};
+
 export const getAccidentAnalysis = async (): Promise<AccidentAnalysis> => {
   const response = await api.get<AccidentAnalysis>('/accidents/analysis');
   return response.data;
@@ -47,5 +52,10 @@ export const getAccidentTypes = async (): Promise<string[]> => {
 
 export const getAccidentRoles = async (): Promise<string[]> => {
   const response = await api.get<string[]>('/accidents/accident-roles');
+  return response.data;
+};
+
+export const getAccidentCauses = async (): Promise<string[]> => {
+  const response = await api.get<string[]>('/accidents/accident-causes');
   return response.data;
 };

@@ -111,5 +111,11 @@ public class AccidentController {
     public ResponseEntity<Collection<Object>> getAccidentRoles() {
         return ResponseEntity.ok(accidentService.getAccidentRoles());
     }
+    
+    @GetMapping("/accident-causes")
+    @PreAuthorize("hasPermission('VIEW_ACCIDENTS', '')")
+    public ResponseEntity<Collection<Object>> getAccidentCauses() {
+        return ResponseEntity.ok(accidentService.getAccidentCauses());
+    }
 
 }

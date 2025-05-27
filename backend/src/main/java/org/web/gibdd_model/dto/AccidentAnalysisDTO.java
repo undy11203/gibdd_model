@@ -1,6 +1,8 @@
 package org.web.gibdd_model.dto;
 
 import lombok.Data;
+import org.web.gibdd_model.model.enums.AccidentCause;
+
 import java.util.List;
 
 @Data
@@ -19,7 +21,7 @@ public class AccidentAnalysisDTO {
 
     @Data
     public static class CauseAnalysisDTO {
-        private String cause;
+        private AccidentCause cause;
         private Long accidentCount;
         private Double percentageOfTotal;
     }

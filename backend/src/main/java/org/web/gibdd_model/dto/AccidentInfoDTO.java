@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.web.gibdd_model.model.enums.AccidentCause;
 import org.web.gibdd_model.model.enums.AccidentRole;
 import org.web.gibdd_model.model.enums.AccidentType;
 
@@ -20,7 +21,7 @@ public class AccidentInfoDTO {
     private String description;
     private Integer victimsCount;
     private Double damageAmount;
-    private String cause;
+    private AccidentCause cause;
     private String roadConditions;
     private AccidentRole role; // AccidentRole as string
 

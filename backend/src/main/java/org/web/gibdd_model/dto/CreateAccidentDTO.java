@@ -12,7 +12,7 @@ import java.util.List;
 public class CreateAccidentDTO {
     private LocalDate date;
     private LocationDTO location;
-    private AccidentType type;
+    private String type;
     private String description;
     private Integer victimsCount;
     private Double damageAmount;
@@ -22,13 +22,13 @@ public class CreateAccidentDTO {
 
     @Data
     public static class LocationDTO {
-        private Double lat;
-        private Double lng;
+        private Double latitude;
+        private Double longitude;
     }
 
     @Data
     public static class ParticipantDTO {
         private String licensePlate;
-        private AccidentRole role;
+        private String role;
     }
 }

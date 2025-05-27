@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 import org.web.gibdd_model.model.enums.AccidentRole;
 import org.web.gibdd_model.model.enums.AccidentType;
+import org.web.gibdd_model.model.enums.AccidentCause;
 import org.web.gibdd_model.repository.AccidentRepository;
 import org.web.gibdd_model.repository.VehicleRepository;
 
@@ -43,7 +44,7 @@ public class AccidentService {
 
     public Page<Accident> getAccidents(LocalDate dateFrom, LocalDate dateTo, String type, Pageable pageable) {
         if (dateFrom != null && dateTo != null && type != null && !type.isEmpty()) {
-            return accidentRepository.findByDateBetweenAndType(dateFrom, dateTo, type, pageable);
+            return accidentRepository.findByDateBetweenAndType(dateFrom, dateTo, AccidentType.fromDescription(type), pageable);
         } else if (dateFrom != null && dateTo != null) {
             return accidentRepository.findByDateBetween(dateFrom, dateTo, pageable);
         } else if (type != null && !type.isEmpty()) {
@@ -56,18 +57,18 @@ public class AccidentService {
     public Accident createAccident(CreateAccidentDTO dto) {
         // Create point from coordinates
         Point location = geometryFactory.createPoint(
-            new Coordinate(dto.getLocation().getLng(), dto.getLocation().getLat())
+            new Coordinate(dto.getLocation().getLongitude(), dto.getLocation().getLatitude())
         );
 
         // Create and save accident
         Accident accident = new Accident();
         accident.setDate(dto.getDate());
         accident.setLocation(location);
-        accident.setType(dto.getType());
+        accident.setType(AccidentType.fromDescription(dto.getType()));
         accident.setDescription(dto.getDescription());
         accident.setVictimsCount(dto.getVictimsCount());
         accident.setDamageAmount(dto.getDamageAmount());
-        accident.setCause(dto.getCause());
+        accident.setCause(AccidentCause.fromDescription(dto.getCause()));
         accident.setRoadConditions(dto.getRoadConditions());
         
         accident = accidentRepository.save(accident);
@@ -87,7 +88,7 @@ public class AccidentService {
                 AccidentParticipant participant = new AccidentParticipant();
                 participant.setAccident(accident);
                 participant.setOwner(owner);
-                participant.setRole(participantDTO.getRole());
+                participant.setRole(AccidentRole.fromDescription(participantDTO.getRole()));
                 
             }
         }
@@ -130,7 +131,7 @@ public class AccidentService {
 
         List<Object[]> statistics;
         if (type != null) {
-            statistics = accidentRepository.findByDateBetweenAndType(startDate, endDate, type.toString(), PageRequest.of(0, Integer.MAX_VALUE))
+            statistics = accidentRepository.findByDateBetweenAndType(startDate, endDate, type, PageRequest.of(0, Integer.MAX_VALUE))
                     .stream()
                     .filter(accident -> accident != null && accident.getType() != null)
                     .map(accident -> new Object[]{
@@ -150,7 +151,7 @@ public class AccidentService {
 
         try {
             return statistics.stream()
-                    .filter(row -> row != null && row[0] != null)
+                    .filter(row -> row[0] != null)
                     .collect(Collectors.groupingBy(
                             row -> AccidentType.valueOf(row[0].toString()),
                             Collectors.collectingAndThen(
@@ -164,6 +165,7 @@ public class AccidentService {
                                         int totalVictims = list.stream()
                                                 .mapToInt(row -> row[3] != null ? ((Number) row[3]).intValue() : 0)
                                                 .sum();
+
                                         return new AccidentStatisticsDTO(
                                                 AccidentType.valueOf(list.get(0)[0].toString()),
                                                 count,
@@ -176,8 +178,8 @@ public class AccidentService {
                     .values()
                     .stream()
                     .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Error processing accident statistics: Invalid accident type", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error processing accident statistics: " + e.getMessage(), e);
         }
     }
 
@@ -211,7 +213,7 @@ public class AccidentService {
             if (!causeData.isEmpty() && causeData.get(0) != null && causeData.get(0)[0] != null) {
                 Object[] mostFrequentCause = causeData.get(0); // Get the first (most frequent) cause
                 AccidentAnalysisDTO.CauseAnalysisDTO causeAnalysis = new AccidentAnalysisDTO.CauseAnalysisDTO();
-                causeAnalysis.setCause((String) mostFrequentCause[0]);
+                causeAnalysis.setCause((AccidentCause) mostFrequentCause[0]);
                 causeAnalysis.setAccidentCount(((Number) mostFrequentCause[1]).longValue());
                 
                 // Calculate percentage
@@ -260,6 +262,12 @@ public class AccidentService {
     public Collection<Object> getAccidentRoles() {
         return List.of(Stream.of(AccidentRole.values())
                 .map(AccidentRole::getDescription)
+                .toArray(String[]::new));
+    }
+    
+    public Collection<Object> getAccidentCauses() {
+        return List.of(Stream.of(AccidentCause.values())
+                .map(AccidentCause::getDescription)
                 .toArray(String[]::new));
     }
 }

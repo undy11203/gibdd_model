@@ -6,20 +6,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.web.gibdd_model.model.Accident;
+import org.web.gibdd_model.model.enums.AccidentType;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface AccidentRepository extends JpaRepository<Accident, Long> {
 
-    Page<Accident> findByDateBetweenAndType(LocalDate dateFrom, LocalDate dateTo, String type, Pageable pageable);
+    Page<Accident> findByDateBetweenAndType(LocalDate dateFrom, LocalDate dateTo, AccidentType type, Pageable pageable);
 
     Page<Accident> findByDateBetween(LocalDate dateFrom, LocalDate dateTo, Pageable pageable);
 
     Page<Accident> findByType(String type, Pageable pageable);
 
-    //Статистика по типам ДТП за период (?)
-    @Query("SELECT d.type, COUNT(*) AS accidentCount " +
+    //Статистика по типам ДТП за период
+    @Query("SELECT d.type, COUNT(d) AS accidentCount, AVG(d.damageAmount) AS avgDamage, SUM(d.victimsCount) AS totalVictims " +
             "FROM Accident d " +
             "WHERE d.date BETWEEN :startDate AND :endDate " +
             "GROUP BY d.type")

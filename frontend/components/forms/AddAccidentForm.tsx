@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'; // Added useEffect
 import { useForm, useFieldArray } from 'react-hook-form';
 import { AccidentData } from '@/types'; // Removed AccidentType, AccidentRole
-import { addAccident, getVehicleByLicensePlate, getAccidentTypes, getAccidentRoles } from '../../utils/api'; // Added getAccidentTypes, getAccidentRoles
+import { addAccident, getAccidentTypes, getAccidentRoles, getAccidentCauses } from '../../utils/api'; // Added getAccidentCauses
 import YandexLocationPicker from '../../components/YandexLocationPicker';
 
 interface ParticipantData {
@@ -33,6 +33,7 @@ const AddAccidentForm = () => {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [accidentTypeOptions, setAccidentTypeOptions] = useState<string[]>([]); // Added
   const [accidentRoleOptions, setAccidentRoleOptions] = useState<string[]>([]); // Added
+  const [accidentCauseOptions, setAccidentCauseOptions] = useState<string[]>([]); // Added for causes
 
   const {
     register,
@@ -68,6 +69,8 @@ const AddAccidentForm = () => {
         setAccidentTypeOptions(types);
         const roles = await getAccidentRoles();
         setAccidentRoleOptions(roles);
+        const causes = await getAccidentCauses();
+        setAccidentCauseOptions(causes);
       } catch (err) {
         console.error("Error fetching accident enums", err);
       }
@@ -79,16 +82,6 @@ const AddAccidentForm = () => {
     try {
       setIsSubmitting(true);
       setError(null);
-
-      // Validate vehicle license plates
-      for (const participant of data.participants) {
-        try {
-          await getVehicleByLicensePlate(participant.licensePlate);
-        } catch (err) {
-          setError(`Транспортное средство с номером ${participant.licensePlate} не найдено`);
-          return;
-        }
-      }
       
       const preparedData: AccidentData = {
         date: data.date,
@@ -210,11 +203,17 @@ const AddAccidentForm = () => {
 
         <div>
           <label className="block mb-1 font-medium">Причина</label>
-          <input
-            type="text"
+          <select
             {...register('cause', { required: 'Обязательное поле' })}
             className="w-full p-2 border rounded"
-          />
+          >
+            <option value="">Выберите причину ДТП</option>
+            {accidentCauseOptions.map((cause) => (
+              <option key={cause} value={cause}>
+                {cause}
+              </option>
+            ))}
+          </select>
           {errors.cause && (
             <p className="text-red-500 text-sm mt-1">{errors.cause.message}</p>
           )}

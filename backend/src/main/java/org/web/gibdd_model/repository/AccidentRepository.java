@@ -43,8 +43,8 @@ public interface AccidentRepository extends JpaRepository<Accident, Long> {
 
     //Получить данные о количестве ДТП, совершаемых водителями в нетрезвом виде и доля таких происшествий в общем количестве ДТП
     @Query("SELECT COUNT(*) AS totalAccidents, " +
-            "SUM(CASE WHEN d.cause = 'Нетрезвое_состояние' THEN 1 ELSE 0 END) AS drunkAccidents, " +
-            "ROUND(SUM(CASE WHEN d.cause = 'Нетрезвое_состояние' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS drunkPercentage, " +
+            "SUM(CASE WHEN d.cause = 'DRUNK_DRIVING' THEN 1 ELSE 0 END) AS drunkAccidents, " +
+            "ROUND(SUM(CASE WHEN d.cause = 'DRUNK_DRIVING' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS drunkPercentage, " +
             "AVG(d.damageAmount) AS avgDamage, " +
             "SUM(d.victimsCount) AS totalVictims " +
             "FROM Accident d")
